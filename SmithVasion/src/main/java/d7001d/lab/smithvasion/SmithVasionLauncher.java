@@ -14,6 +14,8 @@ import jade.wrapper.StaleProxyException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,7 +37,11 @@ public class SmithVasionLauncher {
     logger.log(Level.INFO, "Agent Smith name? -> {0}", AgentSmith.class.getCanonicalName());
     AgentController smithCtrl = 
             cc.createNewAgent(smithName, AgentSmith.class.getCanonicalName(), 
-                    new Object[0]);
+                    new Object[]{
+                      InetAddress.getByName("localhost"),
+                      9876,
+                      5000l
+                    });
     smithCtrl.start();
   }
   

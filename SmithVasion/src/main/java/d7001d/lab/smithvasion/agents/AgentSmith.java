@@ -8,6 +8,7 @@ package d7001d.lab.smithvasion.agents;
 import jade.core.Agent;
 import jade.core.behaviours.TickerBehaviour;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.logging.Level;
@@ -24,7 +25,7 @@ public class AgentSmith extends Agent{
   private InetAddress targetAddress;
   
   private void parseParams(Object[] args) {
-    if (args.length > 3) {
+    if (args.length >= 3) {
       try {
         targetAddress = (InetAddress) args[0];
       } catch (ClassCastException ex) {
@@ -42,6 +43,8 @@ public class AgentSmith extends Agent{
       } catch (ClassCastException ex) {
         logger.log(Level.INFO, "Wrong attack period parameter", ex);
       }
+    } else {
+      logger.log(Level.INFO, "Not enough parameter to start working!");
     }
   }
   
@@ -61,11 +64,12 @@ public class AgentSmith extends Agent{
     protected void onTick() {
       try {
         Socket s = new Socket(targetAddress, targetPort);
+        logger.log(Level.INFO, "tick!");
         s.getOutputStream().write("42\r\n".getBytes());
         s.getOutputStream().write("Welcome in the matrix Neo\r\n".getBytes());
         s.getOutputStream().flush();
       } catch (IOException ex) {
-        logger.log(Level.SEVERE, null, ex);
+        logger.log(Level.INFO, "connection failed but we don't really care");
       }
     }
   }

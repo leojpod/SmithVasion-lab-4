@@ -74,3 +74,4 @@ $RECYCLE.BIN/
 *.msi
 *.msm
 *.msp
+/SmithVasion/target/

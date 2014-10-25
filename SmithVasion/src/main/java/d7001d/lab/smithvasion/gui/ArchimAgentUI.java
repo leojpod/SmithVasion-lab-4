@@ -20,11 +20,12 @@ import javax.swing.event.ListDataListener;
 public class ArchimAgentUI extends javax.swing.JFrame implements ListDataListener{
   private static final Logger logger = Logger.getLogger(ArchimAgentUI.class.getName());
   ListModel<PlateformReport> plateformsModel;
-  
+  PlateformReport totalReport;
   /**
    * Creates new form ArchimAgentUI
    */
   public ArchimAgentUI() {
+    totalReport = new PlateformReport("Total", 0);
     initComponents();
     this.jPanel2.add(Box.createHorizontalGlue());
     this.plateformsModel = new DefaultComboBoxModel<>(new PlateformReport[]{
@@ -33,7 +34,9 @@ public class ArchimAgentUI extends javax.swing.JFrame implements ListDataListene
       new PlateformReport("Plateforme 3", 150)
     });
     this.plateformsModel.addListDataListener(this);
+    
     this.updatePlateformReport(null);
+    
   }
 
   /**
@@ -60,7 +63,7 @@ public class ArchimAgentUI extends javax.swing.JFrame implements ListDataListene
     monitoringPanel = new javax.swing.JPanel();
     plateformReportPanel = new javax.swing.JPanel();
     jSeparator2 = new javax.swing.JSeparator();
-    totalActivityReportPanel = new javax.swing.JPanel();
+    totalActivityReportPanel = new PlateformReportPanel(totalReport);
 
     setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
     getContentPane().setLayout(new javax.swing.BoxLayout(getContentPane(), javax.swing.BoxLayout.LINE_AXIS));
@@ -201,9 +204,12 @@ public class ArchimAgentUI extends javax.swing.JFrame implements ListDataListene
   private void updatePlateformReport(ListDataEvent e) {
     logger.log(Level.INFO, "updatePlateformReport");
     this.plateformReportPanel.removeAll();
+    int totalAgentCount = 0;
     for (int i = 0; i < this.plateformsModel.getSize(); i += 1) {
-      this.plateformReportPanel.add(
-              new PlateformReportPanel(this.plateformsModel.getElementAt(i)));
+      final PlateformReport report = this.plateformsModel.getElementAt(i);
+      this.plateformReportPanel.add(new PlateformReportPanel(report));
+      totalAgentCount += report.getNumAgents();
     }
+    this.totalReport.setNumAgents(totalAgentCount);
   }
 }

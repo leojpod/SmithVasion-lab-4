@@ -13,7 +13,7 @@ public class Server implements Runnable {
     private ServerSocket serverSocket;
 
     private Socket socket;
-    private int fibonacciNumber = 1;
+    private int fibonacciNumber = 100;
     
     public Server(Socket socket) {
         

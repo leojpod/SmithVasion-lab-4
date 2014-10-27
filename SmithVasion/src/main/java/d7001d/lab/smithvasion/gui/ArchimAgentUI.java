@@ -87,12 +87,22 @@ public class ArchimAgentUI extends javax.swing.JFrame implements ListDataListene
     portInput.setText("port");
     portInput.setMaximumSize(new java.awt.Dimension(45, 25));
     portInput.setPreferredSize(new java.awt.Dimension(40, 19));
+    portInput.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        portInputActionPerformed(evt);
+      }
+    });
     jPanel1.add(portInput);
 
     controlPanel.add(jPanel1);
 
     attackButton.setText("Attack");
     attackButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+    attackButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        attackButtonActionPerformed(evt);
+      }
+    });
     controlPanel.add(attackButton);
 
     jSeparator1.setMaximumSize(new java.awt.Dimension(32767, 10));
@@ -128,8 +138,16 @@ public class ArchimAgentUI extends javax.swing.JFrame implements ListDataListene
   }// </editor-fold>//GEN-END:initComponents
 
   private void addressInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addressInputActionPerformed
-    // TODO add your handling code here:
+    this.newTargetSelected();
   }//GEN-LAST:event_addressInputActionPerformed
+
+  private void portInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_portInputActionPerformed
+    this.newTargetSelected();
+  }//GEN-LAST:event_portInputActionPerformed
+
+  private void attackButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_attackButtonActionPerformed
+    this.newTargetSelected();
+  }//GEN-LAST:event_attackButtonActionPerformed
 
   /**
    * @param args the command line arguments
@@ -211,5 +229,17 @@ public class ArchimAgentUI extends javax.swing.JFrame implements ListDataListene
       totalAgentCount += report.getNumAgents();
     }
     this.totalReport.setNumAgents(totalAgentCount);
+  }
+
+  private void newTargetSelected() {
+    String address = this.addressInput.getText();
+    int port;
+    try {
+      port = Integer.parseInt(this.portInput.getText());
+    } catch (NumberFormatException ex) {
+      this.portInput.setText("");
+      return;
+    }
+    
   }
 }

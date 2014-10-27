@@ -59,6 +59,9 @@
                   <Dimension value="[40, 19]"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="portInputActionPerformed"/>
+              </Events>
             </Component>
           </SubComponents>
         </Container>
@@ -67,6 +70,9 @@
             <Property name="text" type="java.lang.String" value="Attack"/>
             <Property name="horizontalTextPosition" type="int" value="0"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="attackButtonActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JSeparator" name="jSeparator1">
           <Properties>

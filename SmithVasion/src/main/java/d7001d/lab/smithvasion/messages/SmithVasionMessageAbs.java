@@ -22,7 +22,7 @@ public abstract class SmithVasionMessageAbs {
     this(enumType);
   }
   
-  public ACLMessage createACLMessageTemplate() {
+  protected ACLMessage createACLMessageTemplate() {
     ACLMessage msg = new ACLMessage(enumType.performative);
     msg.addUserDefinedParameter(TYPE_KEY, enumType.name());
     return msg;

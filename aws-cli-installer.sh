@@ -5,4 +5,4 @@ python get-pip.py
 rm get-pip.py
 pip install awscli
 # get auto completion on bash
-complete -C aws_completer aws
+echo "complete -C /usr/local/bin/aws_completer aws" >> ~/.bashrc

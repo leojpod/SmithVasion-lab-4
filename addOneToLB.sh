@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Launch a new aws instance from $AMI image
-AMI=ami-1205ac65
+AMI=ami-38db734f
 #number of new instances
 NUMBER=1
 debug=/home/ubuntu/debug

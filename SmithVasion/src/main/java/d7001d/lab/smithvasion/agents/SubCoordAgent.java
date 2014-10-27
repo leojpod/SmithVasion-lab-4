@@ -5,6 +5,11 @@
  */
 package d7001d.lab.smithvasion.agents;
 
+import d7001d.lab.smithvasion.exceptions.NoSuchMessageException;
+import d7001d.lab.smithvasion.exceptions.WrongPerformativeException;
+import d7001d.lab.smithvasion.messages.NewTargetMessage;
+import d7001d.lab.smithvasion.messages.SmithVasionMessageAbs;
+import d7001d.lab.smithvasion.messages.SmithVasionMessageFactory;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
@@ -45,7 +50,21 @@ public class SubCoordAgent extends Agent{
     this.addBehaviour(new CyclicBehaviour() {
       @Override
       public void action() {
-        ACLMessage msg = receive();
+        try {
+          ACLMessage msg = receive();
+          SmithVasionMessageAbs message = SmithVasionMessageFactory.fromACLMessage(msg);
+          //use instance of to find if this is a message this agent should handle
+          if (message instanceof NewTargetMessage) {
+            NewTargetMessage newTargetMsg = (NewTargetMessage) message;
+            //TODO pass on this message to all the listening instances of AgentSmith
+            //but for now:
+            logger.log(Level.INFO, 
+                    "Received a new Target order from the Architect!\r\n\t {0}",
+                    newTargetMsg);
+          }
+        } catch (WrongPerformativeException | NoSuchMessageException ex) {
+          logger.log(Level.SEVERE, null, ex);
+        }
         
       }
     });
@@ -53,4 +72,9 @@ public class SubCoordAgent extends Agent{
   }
   
   
+  @Override
+  protected void takeDown() {
+    try { DFService.deregister(this); }
+    catch (Exception e) {}
+  }
 }

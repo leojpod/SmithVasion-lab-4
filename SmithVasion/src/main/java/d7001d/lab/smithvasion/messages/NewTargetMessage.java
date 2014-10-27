@@ -37,5 +37,13 @@ public class NewTargetMessage extends SmithVasionMessageAbs{
     msg.addUserDefinedParameter(ADDRESS_KEY, targetAddress);
     return msg;
   }
+
+  @Override
+  public String toString() {
+    return "your mission is to locate and destroy this target -> " +
+            targetAddress +":" + targetPort;
+  }
+  
+  
   
 }

@@ -63,8 +63,6 @@ public class SubCoordAgent extends Agent{
                       "Received a new Target order from the Architect!\r\n\t {0}",
                       newTargetMsg);
             }
-          } else {
-            return;
           }
         } catch (WrongPerformativeException | NoSuchMessageException ex) {
           logger.log(Level.SEVERE, null, ex);

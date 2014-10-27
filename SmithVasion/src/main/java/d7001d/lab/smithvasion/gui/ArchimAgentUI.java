@@ -5,7 +5,9 @@
  */
 package d7001d.lab.smithvasion.gui;
 
+import d7001d.lab.smithvasion.gui.events.ArchimEvent;
 import d7001d.lab.smithvasion.models.PlateformReport;
+import jade.gui.GuiAgent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Box;
@@ -19,8 +21,9 @@ import javax.swing.event.ListDataListener;
  */
 public class ArchimAgentUI extends javax.swing.JFrame implements ListDataListener{
   private static final Logger logger = Logger.getLogger(ArchimAgentUI.class.getName());
-  ListModel<PlateformReport> plateformsModel;
-  PlateformReport totalReport;
+  private GuiAgent uiAgent;
+  private ListModel<PlateformReport> plateformsModel;
+  private PlateformReport totalReport;
   /**
    * Creates new form ArchimAgentUI
    */
@@ -240,6 +243,12 @@ public class ArchimAgentUI extends javax.swing.JFrame implements ListDataListene
       this.portInput.setText("");
       return;
     }
+    //create a UI event and send it
+    this.uiAgent.postGuiEvent(new ArchimEvent.NewTargetEvent(this, address, port));
     
+  }
+  public void setAgent(GuiAgent agent) {
+    this.uiAgent = agent;
+    this.pack();
   }
 }

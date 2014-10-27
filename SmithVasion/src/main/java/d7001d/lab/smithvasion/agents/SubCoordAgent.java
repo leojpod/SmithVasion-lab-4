@@ -10,6 +10,7 @@ import d7001d.lab.smithvasion.exceptions.WrongPerformativeException;
 import d7001d.lab.smithvasion.messages.NewTargetMessage;
 import d7001d.lab.smithvasion.messages.SmithVasionMessageAbs;
 import d7001d.lab.smithvasion.messages.SmithVasionMessageFactory;
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
@@ -17,6 +18,7 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,6 +60,19 @@ public class SubCoordAgent extends Agent{
             if (message instanceof NewTargetMessage) {
               NewTargetMessage newTargetMsg = (NewTargetMessage) message;
               //TODO pass on this message to all the listening instances of AgentSmith
+              
+              // ---------------------------------------------------------------
+              // Send a ACL message to AgentSmith
+              ACLMessage out_msg = new ACLMessage(ACLMessage.INFORM);
+              out_msg.addReceiver(new AID("AgentSmith", AID.ISLOCALNAME));
+              out_msg.setContent(newTargetMsg.toString());
+              send(out_msg);
+              
+              logger.log(Level.INFO, "Pass a message to AgentSmith ", newTargetMsg);
+              
+              // ---------------------------------------------------------------
+              
+              
               //but for now:
               logger.log(Level.INFO, 
                       "Received a new Target order from the Architect!\r\n\t {0}",

@@ -52,15 +52,19 @@ public class SubCoordAgent extends Agent{
       public void action() {
         try {
           ACLMessage msg = receive();
-          SmithVasionMessageAbs message = SmithVasionMessageFactory.fromACLMessage(msg);
-          //use instance of to find if this is a message this agent should handle
-          if (message instanceof NewTargetMessage) {
-            NewTargetMessage newTargetMsg = (NewTargetMessage) message;
-            //TODO pass on this message to all the listening instances of AgentSmith
-            //but for now:
-            logger.log(Level.INFO, 
-                    "Received a new Target order from the Architect!\r\n\t {0}",
-                    newTargetMsg);
+          if (msg != null) {
+            SmithVasionMessageAbs message = SmithVasionMessageFactory.fromACLMessage(msg);
+            //use instance of to find if this is a message this agent should handle
+            if (message instanceof NewTargetMessage) {
+              NewTargetMessage newTargetMsg = (NewTargetMessage) message;
+              //TODO pass on this message to all the listening instances of AgentSmith
+              //but for now:
+              logger.log(Level.INFO, 
+                      "Received a new Target order from the Architect!\r\n\t {0}",
+                      newTargetMsg);
+            }
+          } else {
+            return;
           }
         } catch (WrongPerformativeException | NoSuchMessageException ex) {
           logger.log(Level.SEVERE, null, ex);

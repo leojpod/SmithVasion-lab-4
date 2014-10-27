@@ -15,8 +15,8 @@ public class NewTargetMessage extends SmithVasionMessageAbs{
   private static final String PORT_KEY = "PORT";
   private static final String ADDRESS_KEY = "ADDRESS";
   
-  private final String targetAddress;
-  private final Integer targetPort;
+  public final String targetAddress;
+  public final Integer targetPort;
 
   public NewTargetMessage(String target, int port) {
     super(SmithVasionMessageFactory.NewTarget);

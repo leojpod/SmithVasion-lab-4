@@ -5,8 +5,17 @@
  */
 package d7001d.lab.smithvasion.agents;
 
+import d7001d.lab.smithvasion.messages.*;
+import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.TickerBehaviour;
+import jade.domain.DFService;
+import jade.domain.FIPAException;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.lang.acl.ACLMessage;
+
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.InetAddress;
@@ -54,6 +63,27 @@ public class AgentSmith extends Agent{
     parseParams(args);
     //"final" parameters for now
     this.addBehaviour(new AttackBehavior(this, attackPeriod));
+    
+    // ----------------------------------
+    // Register to DF
+    DFAgentDescription dfd = new DFAgentDescription();
+    ServiceDescription sd = new ServiceDescription();
+    sd.setType(AgentSmith.class.getName());
+    sd.setName(this.getLocalName());
+    dfd.setName(this.getAID());
+    dfd.addServices(sd);
+    
+    try {
+      DFService.register(this, dfd);
+    } catch (FIPAException ex) {
+      logger.log(Level.SEVERE, "{0} registration to the DF failed", this.getLocalName());
+      this.doDelete();
+      return;
+    }
+    
+    logger.log(Level.INFO, "AgentSmith {0} reporting for duty!", this.getLocalName());
+    
+    // ----------------------------------
   }
   
   private final class AttackBehavior extends TickerBehaviour{
@@ -74,4 +104,33 @@ public class AgentSmith extends Agent{
     }
   }
   
+  // -----------------------------------------------------
+  // Create a cyclic behavior to read newTargetMessages
+  public class MessagesReader extends CyclicBehaviour {
+		
+        // Variable to Hold the content of the received Message
+        private String Message_Content;
+        private String SenderName;
+        private StringBuffer Target_Message;
+
+        @Override
+        public void action() {
+            //Receive a Message
+            ACLMessage msg = receive();
+            if(msg != null) {
+
+                Message_Content = msg.getContent();
+                SenderName = msg.getSender().getLocalName();
+                
+                // Check receiver ID 
+                if(SenderName == "AgentSmith") {        	
+                	Target_Message.append(Message_Content + "\n");              	 
+                	logger.log(Level.INFO, "AgentSmith received message!", this.Message_Content);	
+                }
+                
+                System.out.println("Current Message: " + Target_Message);
+            }
+        }					
+  }
+  // -----------------------------------------------------
 }

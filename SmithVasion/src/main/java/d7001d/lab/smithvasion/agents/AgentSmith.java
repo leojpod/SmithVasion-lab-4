@@ -5,8 +5,15 @@
  */
 package d7001d.lab.smithvasion.agents;
 
+import d7001d.lab.smithvasion.exceptions.NoSuchMessageException;
+import d7001d.lab.smithvasion.exceptions.WrongPerformativeException;
+import d7001d.lab.smithvasion.messages.NewTargetMessage;
+import d7001d.lab.smithvasion.messages.SmithVasionMessageAbs;
+import d7001d.lab.smithvasion.messages.SmithVasionMessageFactory;
 import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.TickerBehaviour;
+import jade.lang.acl.ACLMessage;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.InetAddress;
@@ -54,6 +61,34 @@ public class AgentSmith extends Agent{
     parseParams(args);
     //"final" parameters for now
     this.addBehaviour(new AttackBehavior(this, attackPeriod));
+    this.addBehaviour(new UpdateTarget(this));
+  }
+    
+  private final class UpdateTarget extends CyclicBehaviour {
+
+    public UpdateTarget(Agent a) {
+      super(a);
+    }
+
+    @Override
+    public void action() {
+      try {
+        ACLMessage msg = receive();
+        if (msg != null) {
+          SmithVasionMessageAbs message = SmithVasionMessageFactory.fromACLMessage(msg);
+          //use instance of to find if this is a message this agent should handle
+          if (message instanceof NewTargetMessage) {
+            NewTargetMessage newTargetMsg = (NewTargetMessage) message;
+
+            logger.log(Level.INFO, 
+                    "Received a new Target order from the SubCoord!\r\n\t {0}",
+                    newTargetMsg);
+          }
+        }
+      } catch (WrongPerformativeException | NoSuchMessageException ex) {
+        logger.log(Level.SEVERE, null, ex);
+      }
+    }
   }
   
   private final class AttackBehavior extends TickerBehaviour{

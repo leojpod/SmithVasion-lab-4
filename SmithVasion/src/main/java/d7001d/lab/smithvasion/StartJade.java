@@ -16,6 +16,7 @@ import jade.wrapper.ContainerController;
 public class StartJade {
   public static final void main(String[] args) {
     Profile p = new ProfileImpl(true);
+    p.setParameter(Profile.PLATFORM_ID, "smithvasion");
     ContainerController cc = jade.core.Runtime.instance().createMainContainer(p);
     
   }

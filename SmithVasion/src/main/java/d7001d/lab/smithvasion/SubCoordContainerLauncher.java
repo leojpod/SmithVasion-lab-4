@@ -36,7 +36,7 @@ public class SubCoordContainerLauncher {
     }
     
     jade.core.Runtime rt = jade.core.Runtime.instance();
-    Profile remoteProfile = new ProfileImpl(remote, port, remote+":"+port+"/JADE", false);
+    Profile remoteProfile = new ProfileImpl(remote, port, "smithvasion", false);
     
     ContainerController cc = rt.createAgentContainer(remoteProfile);
     AgentController subCoordCtrl = 

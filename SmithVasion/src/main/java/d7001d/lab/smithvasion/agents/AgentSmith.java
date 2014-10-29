@@ -137,14 +137,20 @@ public class AgentSmith extends Agent {
     }
     @Override
     protected void onTick() {
+      if (targetAddress != null) {
+        
       try {
-        Socket s = new Socket(targetAddress, targetPort);
-        logger.log(Level.INFO, "tick!");
-        s.getOutputStream().write("42\r\n".getBytes());
-        s.getOutputStream().write("Welcome in the matrix Neo\r\n".getBytes());
-        s.getOutputStream().flush();
-      } catch (IOException ex) {
-        logger.log(Level.INFO, "connection failed on {0} but we don't really care", targetAddress);
+          Socket s = new Socket(targetAddress, targetPort);
+          logger.log(Level.INFO, "tick!");
+          s.getOutputStream().write("42\r\n".getBytes());
+          s.getOutputStream().write("Welcome in the matrix Neo\r\n".getBytes());
+          s.getOutputStream().flush();
+        } catch (IOException ex) {
+          logger.log(Level.INFO, "connection failed on {0} but we don't really care", targetAddress);
+        }
+      } else {
+        logger.log(Level.INFO, "Target address unset. Do nothing");
+        
       }
     }
   }

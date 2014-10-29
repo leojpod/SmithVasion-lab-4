@@ -163,7 +163,7 @@ public class SubCoordAgent extends Agent {
   protected void createContainer(String containerName) {
     jade.core.Runtime rt = jade.core.Runtime.instance();
     profile = new ProfileImpl();
-    profile.setParameter(Profile.CONTAINER_NAME, containerName); 
+    profile.setParameter(Profile.CONTAINER_NAME, this.getLocalName() + "-SmithContainer"); 
     // Create a new non-main container, connecting to the default 
     // main container (i.e. on this host, port 1099) 
     containerController = rt.createAgentContainer(profile);

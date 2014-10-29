@@ -7,6 +7,7 @@ package d7001d.lab.smithvasion.agents;
 
 import d7001d.lab.smithvasion.exceptions.NoSuchMessageException;
 import d7001d.lab.smithvasion.exceptions.WrongPerformativeException;
+import d7001d.lab.smithvasion.messages.KillAgentMessage;
 import d7001d.lab.smithvasion.messages.NewTargetMessage;
 import d7001d.lab.smithvasion.messages.SmithVasionMessageAbs;
 import d7001d.lab.smithvasion.messages.SmithVasionMessageFactory;
@@ -19,12 +20,9 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import java.io.IOException;
-import java.net.ConnectException;
-import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,9 +35,12 @@ public class AgentSmith extends Agent {
   private long attackPeriod;
   private int targetPort;
   private InetAddress targetAddress;
+  private String owner;
+  private AttackBehavior attack;
+  private TakeOrders takeOrders;
   
   private void parseParams(Object[] args) {
-    if (args.length >= 3) {
+    if (args.length >= 4) {
       try {
         targetAddress = (InetAddress) args[0];
       } catch (ClassCastException ex) {
@@ -54,6 +55,11 @@ public class AgentSmith extends Agent {
       }
       try {
         attackPeriod = (long) args[2];
+      } catch (ClassCastException ex) {
+        logger.log(Level.INFO, "Wrong attack period parameter", ex);
+      }
+      try {
+        owner = (String) args[3];
       } catch (ClassCastException ex) {
         logger.log(Level.INFO, "Wrong attack period parameter", ex);
       }
@@ -72,6 +78,7 @@ public class AgentSmith extends Agent {
     ServiceDescription sd = new ServiceDescription();
     sd.setType(AgentSmith.class.getName());
     sd.setName(this.getLocalName());
+    sd.setOwnership(owner);
     dfd.setName(this.getAID());
     dfd.addServices(sd);
     
@@ -84,13 +91,15 @@ public class AgentSmith extends Agent {
     }
     
     //"final" parameters for now
-    this.addBehaviour(new AttackBehavior(this, attackPeriod));
-    this.addBehaviour(new UpdateTarget(this));
+    attack = new AttackBehavior(this, attackPeriod);
+    this.addBehaviour(attack);
+    takeOrders = new TakeOrders(this);
+    this.addBehaviour(takeOrders);
   }
     
-  private final class UpdateTarget extends CyclicBehaviour {
+  private final class TakeOrders extends CyclicBehaviour {
 
-    public UpdateTarget(Agent a) {
+    public TakeOrders(Agent a) {
       super(a);
     }
 
@@ -120,13 +129,14 @@ public class AgentSmith extends Agent {
             //Set new target of Smith
             setTargetAddress(newTargetAddress);
             setTargetPort(newTargetMsg.targetPort);
+          } else if (message instanceof KillAgentMessage) {
+            AgentSmith.this.doDelete();
           }
           
         }
       } catch (WrongPerformativeException | NoSuchMessageException ex) {
         logger.log(Level.SEVERE, null, ex);
       }
-      
       block();
     }
   }

@@ -17,7 +17,7 @@ public final class RemoveAgentsMessage extends SmithVasionMessageAbs {
   public final Integer numOfAgents;
 
   public RemoveAgentsMessage(Integer numOfAgents) {
-    super(SmithVasionMessageFactory.RemoveAgents);
+    super(SmithVasionMessageFactory.RemoveSomeAgents);
     this.numOfAgents = numOfAgents;
   }
 

@@ -21,16 +21,17 @@ import java.io.InputStreamReader;
  */
 public class SubCoordContainerLauncher {
   public final static void main(String[] args) throws IOException, StaleProxyException {
-    String remote;
-    int port;
-    if (args.length < 2 ) {
+    String remote = "54.171.137.231";
+    int port = 1099;
+    /*if (args.length < 2 ) {
       System.out.println("missing parameters please type them now");
       BufferedReader in = new BufferedReader(new InputStreamReader(System.in)); 
       System.out.println("start with the ip of the platform to join");
       remote = in.readLine();
       System.out.println("now type the port of the platform");
       port = Integer.parseInt(in.readLine());
-    } else {
+    */
+    if (args.length == 2 ) {
       remote = args[0];
       port = Integer.parseInt(args[1]);
     }

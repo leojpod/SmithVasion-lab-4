@@ -5,6 +5,7 @@
  */
 package d7001d.lab.smithvasion.models;
 
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import java.util.EventListener;
 import java.util.EventObject;
 import javax.swing.event.EventListenerList;
@@ -13,7 +14,7 @@ import javax.swing.event.EventListenerList;
  *
  * @author leojpod
  */
-public class PlateformReport {
+public class PlatformReport {
   public class AgentChangeEvent extends EventObject {
     public AgentChangeEvent(Object source) {
       super(source);
@@ -26,10 +27,15 @@ public class PlateformReport {
   protected EventListenerList listenerList = new EventListenerList();
   public final String name;
   private int numAgents;
-  //public SomethingFromJade id;
+  public final DFAgentDescription dfd;
   
-  public PlateformReport(String name, int numAgents) {
+  public PlatformReport(DFAgentDescription dfd, int numAgents) {
+    this.name = dfd.getName().getName(); this.numAgents = numAgents;
+    this.dfd = dfd;
+  }
+  public PlatformReport(String name, int numAgents) {
     this.name = name; this.numAgents = numAgents;
+    this.dfd = null;
   }
   
   public Integer getNumAgents() {

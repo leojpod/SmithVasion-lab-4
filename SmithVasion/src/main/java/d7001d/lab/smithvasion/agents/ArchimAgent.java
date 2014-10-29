@@ -8,14 +8,21 @@ package d7001d.lab.smithvasion.agents;
 import d7001d.lab.smithvasion.gui.ArchimAgentUI;
 import d7001d.lab.smithvasion.gui.events.ArchimEvent;
 import d7001d.lab.smithvasion.messages.NewTargetMessage;
+import d7001d.lab.smithvasion.models.PlatformReport;
+import d7001d.lab.smithvasion.models.SetModel;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.DFService;
+import jade.domain.DFSubscriber;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.gui.GuiAgent;
 import jade.gui.GuiEvent;
 import jade.lang.acl.ACLMessage;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,6 +32,7 @@ import java.util.logging.Logger;
  */
 public class ArchimAgent extends GuiAgent{
   private static final Logger logger = Logger.getLogger(ArchimAgent.class.getName());
+  SetModel<PlatformReport> subCoords;
   
   @Override
   protected void setup() {
@@ -49,6 +57,39 @@ public class ArchimAgent extends GuiAgent{
     ArchimAgentUI ui = new ArchimAgentUI();
     ui.setAgent(this);
     ui.setVisible(true);
+    subCoords = ui.plateformsModel;
+    
+    //Create a dfd template for SubCoordinator
+    DFAgentDescription subCoordDfd = new DFAgentDescription();
+    ServiceDescription subCoordSd = new ServiceDescription();
+    subCoordSd.setType(SubCoordAgent.class.getName());
+    subCoordDfd.addServices(subCoordSd);
+    //init the subCoord set with the existing agents the subscription will deal with that
+//    try {
+//      DFAgentDescription[] subCoordAgents;
+//      subCoordAgents = DFService.search(this, subCoordDfd);
+//      logger.log(Level.INFO, "ArchimAgent has {0} subcoord to start with", subCoordAgents.length);
+//      this.subCoords.addAll(Arrays.asList(subCoordAgents));
+//    } catch (FIPAException ex) {
+//      Logger.getLogger(ArchimAgent.class.getName()).log(Level.SEVERE, null, ex);
+//    }
+    //feed the template to DFSubscriber to keep track of the subCoord Agents
+    this.addBehaviour(new DFSubscriber(this, subCoordDfd) {
+      @Override
+      public void onRegister(DFAgentDescription dfad) {
+        ArchimAgent.this.subCoords.add(new PlatformReport(dfad, 0));
+        logger.log(Level.INFO, 
+                "ArchimAgent has a new SubCoordinator to talk to ({0})", 
+                ArchimAgent.this.subCoords.size());
+      }
+      @Override
+      public void onDeregister(DFAgentDescription dfad) {
+        ArchimAgent.this.subCoords.remove(dfad);
+        logger.log(Level.INFO, 
+                "ArchimAgent losts a new SubCoordinator to talk to ({0})",
+                ArchimAgent.this.subCoords.size());
+      }
+    });
   }
 
   

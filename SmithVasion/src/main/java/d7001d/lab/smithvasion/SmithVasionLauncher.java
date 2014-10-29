@@ -5,7 +5,6 @@
  */
 package d7001d.lab.smithvasion;
 
-import d7001d.lab.smithvasion.agents.AgentSmith;
 import d7001d.lab.smithvasion.agents.ArchimAgent;
 import d7001d.lab.smithvasion.agents.SubCoordAgent;
 import jade.core.Profile;
@@ -16,7 +15,6 @@ import jade.wrapper.StaleProxyException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
 import java.util.logging.Logger;
 
 /**

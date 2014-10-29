@@ -5,19 +5,19 @@
  */
 package d7001d.lab.smithvasion.gui;
 
-import d7001d.lab.smithvasion.models.PlateformReport;
+import d7001d.lab.smithvasion.models.PlatformReport;
 
 /**
  *
  * @author leojpod
  */
-public class PlateformReportPanel extends javax.swing.JPanel implements PlateformReport.AgentChangeEventListener{
-  PlateformReport report;
+public class PlatformReportPanel extends javax.swing.JPanel implements PlatformReport.AgentChangeEventListener{
+  PlatformReport report;
   /**
    * Creates new form PlateformReportPanel
    * @param report
    */
-  public PlateformReportPanel(PlateformReport report) {
+  public PlatformReportPanel(PlatformReport report) {
     this.report = report;
     initComponents();
     this.plateformLabel.setText(this.report.name);
@@ -80,7 +80,7 @@ public class PlateformReportPanel extends javax.swing.JPanel implements Platefor
   // End of variables declaration//GEN-END:variables
 
   @Override
-  public void agentChangeEventOccurred(PlateformReport.AgentChangeEvent evt) {
+  public void agentChangeEventOccurred(PlatformReport.AgentChangeEvent evt) {
     this.updateAgentCount();
   }
 

@@ -41,7 +41,7 @@ public class SubCoordContainerLauncher {
     ContainerController cc = rt.createAgentContainer(remoteProfile);
     AgentController subCoordCtrl = 
             cc.createNewAgent(
-                    "SubCoord", 
+                    "SubCoord" + (int) (Math.random() * 1000), 
                     SubCoordAgent.class.getCanonicalName(), 
                     new Object[0]
             );

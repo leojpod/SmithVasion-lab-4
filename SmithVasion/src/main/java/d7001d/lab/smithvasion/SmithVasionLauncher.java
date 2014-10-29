@@ -42,7 +42,7 @@ public class SmithVasionLauncher {
     // main container (i.e. on this host, port 1099) 
     ContainerController cc = rt.createAgentContainer(p);
 
-    for (int i = 0; i < 10; i += 1) {
+    /*for (int i = 0; i < 1; i += 1) {
       AgentController smithCtrl = 
           cc.createNewAgent(
               smithName + (i + 1), 
@@ -53,13 +53,14 @@ public class SmithVasionLauncher {
                 5000l
               });
       smithCtrl.start();
-    }
+    }*/
 
     AgentController subCoordCtrl = 
         cc.createNewAgent(
             subCoord, 
             SubCoordAgent.class.getCanonicalName(),
             new Object[]{
+              smithName,
             }
     );
     subCoordCtrl.start();

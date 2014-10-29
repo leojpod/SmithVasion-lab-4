@@ -33,7 +33,7 @@ public class NewTargetMessage extends SmithVasionMessageAbs{
   @Override
   public ACLMessage createACLMessage() {
     ACLMessage msg = this.createACLMessageTemplate();
-    msg.addUserDefinedParameter(PORT_KEY, targetPort.toString());
+    msg.addUserDefinedParameter(PORT_KEY, String.valueOf(targetPort));
     msg.addUserDefinedParameter(ADDRESS_KEY, targetAddress);
     return msg;
   }

@@ -28,7 +28,22 @@ public class ArchimAgent extends GuiAgent{
   
   @Override
   protected void setup() {
-    //TODO DF registration
+    
+    // register to DF
+    DFAgentDescription dfd = new DFAgentDescription();
+    ServiceDescription sd = new ServiceDescription();
+    sd.setType(ArchimAgent.class.getName());
+    sd.setName(this.getLocalName());
+    dfd.setName(this.getAID());
+    dfd.addServices(sd);
+    
+    try {
+      DFService.register(this, dfd);
+    } catch (FIPAException ex) {
+      logger.log(Level.SEVERE, "{0} registration to the DF failed", this.getLocalName());
+      this.doDelete();
+      return;
+    }
     
     
     ArchimAgentUI ui = new ArchimAgentUI();

@@ -10,15 +10,21 @@ import d7001d.lab.smithvasion.exceptions.WrongPerformativeException;
 import d7001d.lab.smithvasion.messages.NewTargetMessage;
 import d7001d.lab.smithvasion.messages.SmithVasionMessageAbs;
 import d7001d.lab.smithvasion.messages.SmithVasionMessageFactory;
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
+import static jade.domain.DFService.search;
+import jade.domain.DFSubscriber;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.SearchConstraints;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
+import jade.proto.SubscriptionInitiator;
 import jade.wrapper.AgentContainer;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
@@ -32,22 +38,32 @@ import java.util.logging.Logger;
  *
  * @author leojpod
  */
-public class SubCoordAgent extends Agent{
+public class SubCoordAgent extends Agent {
   private static final Logger logger = Logger.getLogger(SubCoordAgent.class.getName());
   
+  private Agent[] smithTab;
   private ProfileImpl profile;
   private AgentContainer containerController;
+  private DFAgentDescription dfd;
+  private static final int nSmithLaunch = 3;
   
+  private String baseSmithName;
   
   @Override
   protected void setup() {
+    
+    //Get arguments
+    Object[] args = this.getArguments();
+    parseParams(args);
+    
     // register to DF
-    DFAgentDescription dfd = new DFAgentDescription();
+    this.dfd = new DFAgentDescription();
     ServiceDescription sd = new ServiceDescription();
     sd.setType(SubCoordAgent.class.getName());
     sd.setName(this.getLocalName());
     dfd.setName(this.getAID());
     dfd.addServices(sd);
+    
     try {
       DFService.register(this, dfd);
     } catch (FIPAException ex) {
@@ -56,7 +72,7 @@ public class SubCoordAgent extends Agent{
       return;
     }
     this.createContainer("subCoordContainer");
-    this.launchDefault(2);
+    this.launchDefault(nSmithLaunch);
     logger.log(Level.INFO, "SubCoordAgent {0} reporting for duty!", this.getLocalName());
     
     // create cycling behaviour
@@ -64,14 +80,14 @@ public class SubCoordAgent extends Agent{
       @Override
       public void action() {
         try {
+          
           ACLMessage msg = receive();
           if (msg != null) {
             SmithVasionMessageAbs message = SmithVasionMessageFactory.fromACLMessage(msg);
             //use instance of to find if this is a message this agent should handle
             if (message instanceof NewTargetMessage) {
               NewTargetMessage newTargetMsg = (NewTargetMessage) message;
-              //TODO pass on this message to all the listening instances of AgentSmith
-              //but for now:
+              sendToAllSmith(newTargetMsg);
               
               logger.log(Level.INFO, 
                       "Received a new Target order from the Architect!\r\n\t {0}",
@@ -81,16 +97,46 @@ public class SubCoordAgent extends Agent{
         } catch (WrongPerformativeException | NoSuchMessageException ex) {
           logger.log(Level.SEVERE, null, ex);
         }
-        
+        block();
       }
     });
-    // end
+    
+    //this.addBehaviour(new SubscribeInit(this,DFService.createSubscriptionMessage(this,getDefaultDF(),dfd,sc)));
   }
   
   @Override
   protected void takeDown() {
     try { DFService.deregister(this); }
     catch (Exception e) {}
+  }
+  
+  protected DFAgentDescription[] getAllAgent(Agent a) {
+    try {
+      //TODO Trick is here !
+      DFAgentDescription dfdSmith = new DFAgentDescription();
+      ServiceDescription sd = new ServiceDescription();
+      sd.setType(AgentSmith.class.getName());
+      dfdSmith.addServices(sd);
+      //Fucking search methods
+      DFAgentDescription[] result = search( this , dfdSmith);
+      return result;
+    } catch (FIPAException ex) {
+      logger.log(Level.SEVERE, null, ex);
+      return null;
+    }
+  }
+  
+  public void sendToAllSmith(NewTargetMessage msg) {
+    DFAgentDescription[] dfAgentTab = this.getAllAgent((Agent)new AgentSmith());
+    
+    ACLMessage aclMsg = msg.createACLMessage();
+    
+    for (DFAgentDescription dfAgent: dfAgentTab) {
+      
+      System.out.println(dfAgent.getName().getLocalName());
+      aclMsg.addReceiver(dfAgent.getName());
+    }
+    this.send(aclMsg);
   }
   
   /**
@@ -100,10 +146,10 @@ public class SubCoordAgent extends Agent{
   protected void launchDefault(int nSmith) {
     
     for (int i = 0; i < nSmith; i += 1) {
-          AgentController smithCtrl;
+      AgentController smithCtrl;
       try {
         smithCtrl = containerController.createNewAgent(
-                "smith" + (i + 1),
+                this.baseSmithName + (i + 1),
                 AgentSmith.class.getCanonicalName(),
                 new Object[]{
                   InetAddress.getByName("localhost"),
@@ -126,4 +172,47 @@ public class SubCoordAgent extends Agent{
     // main container (i.e. on this host, port 1099) 
     containerController = rt.createAgentContainer(profile);
   }
+  
+      private final class SubscribeInit extends SubscriptionInitiator {
+      private int nMsg=0;
+      //DF is going to send all agent register  in the first msg it send to subCoord
+      public SubscribeInit(Agent a, ACLMessage msg) {
+        super(a, msg);
+      }  
+      
+
+      protected void handleInform(ACLMessage inform)
+      {
+        System.out.println("Here we are !" + inform.getContent());
+        /*if (nMsg == 0) {
+          this.getFirstInform(inform);
+        }
+        try {
+          System.out.println("Agent "+getLocalName()+": Notification received from DF");
+          
+          DFAgentDescription[] result = DFService.decodeNotification(inform.getContent());
+          if(result.length > 0)
+          {
+            System.out.println(result.toString());
+          }
+        } catch (FIPAException ex) {
+          logger.log(Level.SEVERE, null, ex);
+        }*/
+      }
+    }
+      
+      private void parseParams(Object[] args) {
+    if (args.length >= 1) {
+      try {
+        this.baseSmithName = (String) args[0];
+      } catch (ClassCastException ex) {
+        logger.log(Level.SEVERE, "Wrong base Smith name parameter! Default in use \"smith\"");
+        this.baseSmithName = "smith";
+      }
+    } else {
+      logger.log(Level.INFO, "No base name in parameter. Default in use \"smith\"");
+      this.baseSmithName = "smith";
+    }
+  }
+    
 }

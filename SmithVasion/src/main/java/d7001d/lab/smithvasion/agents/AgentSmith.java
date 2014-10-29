@@ -13,6 +13,10 @@ import d7001d.lab.smithvasion.messages.SmithVasionMessageFactory;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.TickerBehaviour;
+import jade.domain.DFService;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import java.io.IOException;
 import java.net.ConnectException;
@@ -20,6 +24,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,7 +32,7 @@ import java.util.logging.Logger;
  *
  * @author leojpod
  */
-public class AgentSmith extends Agent{
+public class AgentSmith extends Agent {
   private static final Logger logger = Logger.getLogger(AgentSmith.class.getName());
   private long attackPeriod;
   private int targetPort;
@@ -61,6 +66,23 @@ public class AgentSmith extends Agent{
   protected void setup() {
     Object[] args = this.getArguments();
     parseParams(args);
+    
+        // register to DF
+    DFAgentDescription dfd = new DFAgentDescription();
+    ServiceDescription sd = new ServiceDescription();
+    sd.setType(AgentSmith.class.getName());
+    sd.setName(this.getLocalName());
+    dfd.setName(this.getAID());
+    dfd.addServices(sd);
+    
+    try {
+      DFService.register(this, dfd);
+    } catch (FIPAException ex) {
+      logger.log(Level.SEVERE, "{0} registration to the DF failed", this.getLocalName());
+      this.doDelete();
+      return;
+    }
+    
     //"final" parameters for now
     this.addBehaviour(new AttackBehavior(this, attackPeriod));
     this.addBehaviour(new UpdateTarget(this));
@@ -76,7 +98,6 @@ public class AgentSmith extends Agent{
     public void action() {
       try {
         ACLMessage msg = receive();
-        
         if (msg != null) {
           SmithVasionMessageAbs message = SmithVasionMessageFactory.fromACLMessage(msg);
           //use instance of to find if this is a message this agent should handle
@@ -91,7 +112,7 @@ public class AgentSmith extends Agent{
             //Didn't get why targetAddress in newTargetMsg is a String but I deal with it here
             InetAddress newTargetAddress = null;
             try {
-              newTargetAddress = InetAddress.getByAddress(newTargetMsg.targetAddress.getBytes());
+              newTargetAddress = InetAddress.getAllByName(newTargetMsg.targetAddress)[0];
             } catch (UnknownHostException ex) {
               logger.log(Level.SEVERE, null, ex);
             }
@@ -123,7 +144,7 @@ public class AgentSmith extends Agent{
         s.getOutputStream().write("Welcome in the matrix Neo\r\n".getBytes());
         s.getOutputStream().flush();
       } catch (IOException ex) {
-        logger.log(Level.INFO, "connection failed but we don't really care");
+        logger.log(Level.INFO, "connection failed on {0} but we don't really care", targetAddress);
       }
     }
   }

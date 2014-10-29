@@ -16,8 +16,10 @@ import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
 import java.io.IOException;
 import java.net.ConnectException;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -74,20 +76,37 @@ public class AgentSmith extends Agent{
     public void action() {
       try {
         ACLMessage msg = receive();
+        
         if (msg != null) {
           SmithVasionMessageAbs message = SmithVasionMessageFactory.fromACLMessage(msg);
           //use instance of to find if this is a message this agent should handle
+       
           if (message instanceof NewTargetMessage) {
             NewTargetMessage newTargetMsg = (NewTargetMessage) message;
 
             logger.log(Level.INFO, 
                     "Received a new Target order from the SubCoord!\r\n\t {0}",
-                    newTargetMsg);
+                    newTargetMsg );
+            
+            //Didn't get why targetAddress in newTargetMsg is a String but I deal with it here
+            InetAddress newTargetAddress = null;
+            try {
+              newTargetAddress = InetAddress.getByAddress(newTargetMsg.targetAddress.getBytes());
+            } catch (UnknownHostException ex) {
+              logger.log(Level.SEVERE, null, ex);
+            }
+            
+            //Set new target of Smith
+            setTargetAddress(newTargetAddress);
+            setTargetPort(newTargetMsg.targetPort);
           }
+          
         }
       } catch (WrongPerformativeException | NoSuchMessageException ex) {
         logger.log(Level.SEVERE, null, ex);
       }
+      
+      block();
     }
   }
   
@@ -107,6 +126,14 @@ public class AgentSmith extends Agent{
         logger.log(Level.INFO, "connection failed but we don't really care");
       }
     }
+  }
+  
+  public void setTargetPort(int targetPort) {
+    this.targetPort = targetPort;
+  }
+
+  public void setTargetAddress(InetAddress targetAddress) {
+    this.targetAddress = targetAddress;
   }
   
 }

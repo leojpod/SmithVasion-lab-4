@@ -36,6 +36,8 @@ public class AgentSmith extends Agent {
   private int targetPort;
   private InetAddress targetAddress;
   private String owner;
+  private AttackBehavior attack;
+  private TakeOrders takeOrders;
   
   private void parseParams(Object[] args) {
     if (args.length >= 4) {
@@ -89,8 +91,10 @@ public class AgentSmith extends Agent {
     }
     
     //"final" parameters for now
-    this.addBehaviour(new AttackBehavior(this, attackPeriod));
-    this.addBehaviour(new TakeOrders(this));
+    attack = new AttackBehavior(this, attackPeriod);
+    this.addBehaviour(attack);
+    takeOrders = new TakeOrders(this);
+    this.addBehaviour(takeOrders);
   }
     
   private final class TakeOrders extends CyclicBehaviour {

@@ -14,7 +14,10 @@ import jade.lang.acl.ACLMessage;
  * @author leojpod
  */
 public enum SmithVasionMessageFactory {
-  NewTarget(ACLMessage.PROPOSE), AddAgents(ACLMessage.PROPOSE);
+  NewTarget(ACLMessage.PROPOSE), 
+  AddAgents(ACLMessage.PROPOSE), 
+  RemoveAgents(ACLMessage.PROPOSE),
+  KillCoord(ACLMessage.PROPOSE);
 
   public final int performative;
   private SmithVasionMessageFactory(int performative) {
@@ -36,6 +39,10 @@ public enum SmithVasionMessageFactory {
           return new NewTargetMessage(msg);
         case AddAgents:
           return new AddAgentsMessage(msg);
+        case RemoveAgents:
+          return new RemoveAgentsMessage(msg);
+        case KillCoord: 
+          return new KillCoordMessage(msg);
         default: 
           assert false; // should never be reached!
           return null;

@@ -8,7 +8,9 @@ package d7001d.lab.smithvasion.agents;
 import d7001d.lab.smithvasion.gui.ArchimAgentUI;
 import d7001d.lab.smithvasion.gui.events.ArchimEvent;
 import d7001d.lab.smithvasion.messages.AddAgentsMessage;
+import d7001d.lab.smithvasion.messages.KillCoordMessage;
 import d7001d.lab.smithvasion.messages.NewTargetMessage;
+import d7001d.lab.smithvasion.messages.RemoveAgentsMessage;
 import d7001d.lab.smithvasion.models.PlatformReport;
 import d7001d.lab.smithvasion.models.PlatformListModel;
 import jade.core.behaviours.OneShotBehaviour;
@@ -62,6 +64,19 @@ public class ArchimAgent extends GuiAgent{
         ArchimAgent.this.postGuiEvent(evt);
         evt.platform.setNumAgents(evt.platform.getNumAgents() + evt.numOfAgents);
       }
+      @Override
+      public void removeAgentEventOccurred(ArchimEvent.RemoveAgentsEvent evt) {
+        ArchimAgent.this.postGuiEvent(evt);
+        int numAgents = evt.platform.getNumAgents() - evt.numOfAgents;
+        numAgents = (numAgents > 0)? numAgents: 0;
+        evt.platform.setNumAgents(numAgents);
+      }
+      @Override
+      public void killCoordEventOccurred(ArchimEvent.KillCoordEvent evt) {
+        ArchimAgent.this.postGuiEvent(evt);
+        subCoords.remove(evt.platform);
+        logger.log(Level.INFO, "loosing a subCoord to talk to {0} ", subCoords.size());
+      }
     });
     
     //Create a dfd template for SubCoordinator
@@ -89,7 +104,7 @@ public class ArchimAgent extends GuiAgent{
       }
       @Override
       public void onDeregister(DFAgentDescription dfad) {
-        ArchimAgent.this.subCoords.remove(dfad);
+        ArchimAgent.this.subCoords.remove(new PlatformReport(dfad, 0));
         logger.log(Level.INFO, 
                 "ArchimAgent losts a new SubCoordinator to talk to ({0})",
                 ArchimAgent.this.subCoords.size());
@@ -111,9 +126,34 @@ public class ArchimAgent extends GuiAgent{
         this.addBehaviour(new OneShotBehaviour() {
           @Override
           public void action() {
-            ACLMessage msg = new AddAgentsMessage(addAgentsEvent.platform.dfd.getName(),
-                    addAgentsEvent.numOfAgents).createACLMessage();
-            logger.log(Level.INFO, "Asking to create agents within subCoord {0}", addAgentsEvent.platform.name);
+            ACLMessage msg = new AddAgentsMessage(addAgentsEvent.numOfAgents).createACLMessage();
+            msg.addReceiver(addAgentsEvent.platform.dfd.getName());
+            logger.log(Level.INFO, "Asking to create {0} agents within subCoord {1}", 
+                    new Object[]{addAgentsEvent.numOfAgents, addAgentsEvent.platform.name});
+            ArchimAgent.this.send(msg);
+          }
+        });
+      } else if (archimEvent instanceof ArchimEvent.RemoveAgentsEvent) {
+        final ArchimEvent.RemoveAgentsEvent removeAgentsEvent = (ArchimEvent.RemoveAgentsEvent) archimEvent;
+        this.addBehaviour(new OneShotBehaviour() {
+          @Override
+          public void action() {
+            ACLMessage msg = new RemoveAgentsMessage(removeAgentsEvent.numOfAgents).createACLMessage();
+            logger.log(Level.INFO, "Asking to kill {0} agents within subCoord {1}", 
+                    new Object[]{removeAgentsEvent.numOfAgents, removeAgentsEvent.platform.name});
+            msg.addReceiver(removeAgentsEvent.platform.dfd.getName());
+            ArchimAgent.this.send(msg);
+          }
+        });
+      } else if (archimEvent instanceof ArchimEvent.KillCoordEvent) {
+        final ArchimEvent.KillCoordEvent killCoordEvent = (ArchimEvent.KillCoordEvent) archimEvent;
+        this.addBehaviour(new OneShotBehaviour() {
+          @Override
+          public void action() {
+            ACLMessage msg = new KillCoordMessage().createACLMessage();
+            logger.log(Level.INFO, "Asking to subCoord {0} to kill himself", 
+                    killCoordEvent.platform.name);
+            msg.addReceiver(killCoordEvent.platform.dfd.getName());
             ArchimAgent.this.send(msg);
           }
         });

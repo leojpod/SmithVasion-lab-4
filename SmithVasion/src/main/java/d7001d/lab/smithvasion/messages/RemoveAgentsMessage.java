@@ -11,20 +11,20 @@ import jade.lang.acl.ACLMessage;
  *
  * @author leojpod
  */
-public final class AddAgentsMessage extends SmithVasionMessageAbs {
+public final class RemoveAgentsMessage extends SmithVasionMessageAbs {
   public static final String NUMBER_KEY = "NUM";
-
+  
   public final Integer numOfAgents;
 
-  public AddAgentsMessage(Integer numOfAgents) {
-    super(SmithVasionMessageFactory.AddAgents);
+  public RemoveAgentsMessage(Integer numOfAgents) {
+    super(SmithVasionMessageFactory.RemoveAgents);
     this.numOfAgents = numOfAgents;
   }
+
   
   
-  public AddAgentsMessage(ACLMessage msg) {
-    this(Integer.parseInt(
-            msg.getUserDefinedParameter(NUMBER_KEY)));
+  public RemoveAgentsMessage(ACLMessage msg) {
+    this(Integer.parseInt(msg.getUserDefinedParameter(NUMBER_KEY)));
   }
 
   @Override
@@ -33,4 +33,5 @@ public final class AddAgentsMessage extends SmithVasionMessageAbs {
     msg.addUserDefinedParameter(NUMBER_KEY, numOfAgents.toString());
     return msg;
   }
+  
 }

@@ -213,7 +213,7 @@ public class ArchimAgentUI extends javax.swing.JFrame implements ListDataListene
   }
 
   private void updatePlateformReport(ListDataEvent e) {
-    logger.log(Level.INFO, "updatePlateformReport");
+    int before = this.plateformReportPanel.getComponents().length;
     this.plateformReportPanel.removeAll();
     int totalAgentCount = 0;
     for (int i = 0; i < this.plateformsModel.getSize(); i += 1) {
@@ -222,6 +222,10 @@ public class ArchimAgentUI extends javax.swing.JFrame implements ListDataListene
       totalAgentCount += report.getNumAgents();
     }
     this.totalReport.setNumAgents(totalAgentCount);
+    logger.log(Level.INFO, "updatePlateformReport -> {0} --> {1}",
+            new Object[]{before, this.plateformReportPanel.getComponents().length});
+    this.plateformReportPanel.validate();
+    this.plateformReportPanel.repaint();
   }
 
   private void newTargetSelected() {

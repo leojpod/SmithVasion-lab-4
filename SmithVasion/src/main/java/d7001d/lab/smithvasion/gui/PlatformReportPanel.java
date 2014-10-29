@@ -44,6 +44,7 @@ public class PlatformReportPanel extends javax.swing.JPanel implements PlatformR
     jSpinner1 = new javax.swing.JSpinner();
     addAgentsButton = new javax.swing.JButton();
     removeAgentsButton = new javax.swing.JButton();
+    killPlatform = new javax.swing.JButton();
 
     setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.LINE_AXIS));
 
@@ -69,7 +70,20 @@ public class PlatformReportPanel extends javax.swing.JPanel implements PlatformR
     add(addAgentsButton);
 
     removeAgentsButton.setText("-");
+    removeAgentsButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        removeAgentsButtonActionPerformed(evt);
+      }
+    });
     add(removeAgentsButton);
+
+    killPlatform.setText("Remove Block");
+    killPlatform.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        killPlatformActionPerformed(evt);
+      }
+    });
+    add(killPlatform);
   }// </editor-fold>//GEN-END:initComponents
 
   private void addAgentsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addAgentsButtonActionPerformed
@@ -80,6 +94,18 @@ public class PlatformReportPanel extends javax.swing.JPanel implements PlatformR
                     (Integer) this.jSpinner1.getValue()));
   }//GEN-LAST:event_addAgentsButtonActionPerformed
 
+  private void removeAgentsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeAgentsButtonActionPerformed
+    this.report.fireAchimEvent(
+            new ArchimEvent.RemoveAgentsEvent(
+                    this, 
+                    report, 
+                    (Integer) this.jSpinner1.getValue()));
+  }//GEN-LAST:event_removeAgentsButtonActionPerformed
+
+  private void killPlatformActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_killPlatformActionPerformed
+    this.report.fireAchimEvent(new ArchimEvent.KillCoordEvent(this, report));
+  }//GEN-LAST:event_killPlatformActionPerformed
+
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton addAgentsButton;
@@ -88,6 +114,7 @@ public class PlatformReportPanel extends javax.swing.JPanel implements PlatformR
   private javax.swing.Box.Filler filler3;
   private javax.swing.Box.Filler filler4;
   private javax.swing.JSpinner jSpinner1;
+  private javax.swing.JButton killPlatform;
   private javax.swing.JLabel plateformLabel;
   private javax.swing.JButton removeAgentsButton;
   private javax.swing.JLabel runningAgentsLabel;

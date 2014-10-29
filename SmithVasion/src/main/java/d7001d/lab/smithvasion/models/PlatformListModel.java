@@ -68,7 +68,7 @@ public class PlatformListModel
   public boolean remove(Object o) {
     boolean res = this.model.remove(o);
     if (res) {
-      this.fireContentsChanged(this, 0, this.lastIdx());
+      this.fireContentsChanged(this, 0, this.size());
     }
     return res;
   }
@@ -126,6 +126,20 @@ public class PlatformListModel
   public void addAgentEventOccurred(ArchimEvent.AddAgentsEvent evt) {
     for (PlatformReport.AgentRequestEventListener listener: listeners.getListeners(PlatformReport.AgentRequestEventListener.class)){
       listener.addAgentEventOccurred(evt);
+    }
+  }
+
+  @Override
+  public void removeAgentEventOccurred(ArchimEvent.RemoveAgentsEvent evt) {
+    for (PlatformReport.AgentRequestEventListener listener: listeners.getListeners(PlatformReport.AgentRequestEventListener.class)){
+      listener.removeAgentEventOccurred(evt);
+    }
+  }
+
+  @Override
+  public void killCoordEventOccurred(ArchimEvent.KillCoordEvent evt) {
+    for (PlatformReport.AgentRequestEventListener listener: listeners.getListeners(PlatformReport.AgentRequestEventListener.class)){
+      listener.killCoordEventOccurred(evt);
     }
   }
 }

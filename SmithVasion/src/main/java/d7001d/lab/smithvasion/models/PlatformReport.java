@@ -9,6 +9,7 @@ import d7001d.lab.smithvasion.gui.events.ArchimEvent;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import java.util.EventListener;
 import java.util.EventObject;
+import java.util.Objects;
 import javax.swing.event.EventListenerList;
 
 /**
@@ -34,6 +35,10 @@ public class PlatformReport {
   }
   public interface AgentRequestEventListener extends EventListener {
     public void addAgentEventOccurred(ArchimEvent.AddAgentsEvent evt);
+
+    public void removeAgentEventOccurred(ArchimEvent.RemoveAgentsEvent evt);
+
+    public void killCoordEventOccurred(ArchimEvent.KillCoordEvent evt);
   }
   
   protected EventListenerList listenerList = new EventListenerList();
@@ -49,6 +54,23 @@ public class PlatformReport {
   public PlatformReport(String name, int numAgents) {
     this.name = name; this.numAgents = numAgents;
     this.dfd = null;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof PlatformReport) {
+      PlatformReport platformReport = (PlatformReport) obj;
+      return this.dfd.getName().equals(platformReport.dfd.getName());
+    } else {
+      return false;
+    }
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 3;
+    hash = 71 * hash + Objects.hashCode(this.name);
+    return hash;
   }
   
   public Integer getNumAgents() {
@@ -80,6 +102,16 @@ public class PlatformReport {
   public void fireAchimEvent(ArchimEvent.AddAgentsEvent evt) {
     for (AgentRequestEventListener listener: this.listenerList.getListeners(AgentRequestEventListener.class)) {
       listener.addAgentEventOccurred(evt);
+    }
+  }
+  public void fireAchimEvent(ArchimEvent.RemoveAgentsEvent evt) {
+    for (AgentRequestEventListener listener: this.listenerList.getListeners(AgentRequestEventListener.class)) {
+      listener.removeAgentEventOccurred(evt);
+    }
+  }
+  public void fireAchimEvent(ArchimEvent.KillCoordEvent evt) {
+    for (AgentRequestEventListener listener: this.listenerList.getListeners(AgentRequestEventListener.class)) {
+      listener.killCoordEventOccurred(evt);
     }
   }
 }

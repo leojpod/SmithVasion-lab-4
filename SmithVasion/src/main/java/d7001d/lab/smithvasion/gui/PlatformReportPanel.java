@@ -5,19 +5,20 @@
  */
 package d7001d.lab.smithvasion.gui;
 
-import d7001d.lab.smithvasion.models.PlateformReport;
+import d7001d.lab.smithvasion.gui.events.ArchimEvent;
+import d7001d.lab.smithvasion.models.PlatformReport;
 
 /**
  *
  * @author leojpod
  */
-public class PlateformReportPanel extends javax.swing.JPanel implements PlateformReport.AgentChangeEventListener{
-  PlateformReport report;
+public class PlatformReportPanel extends javax.swing.JPanel implements PlatformReport.AgentChangeEventListener{
+  PlatformReport report;
   /**
    * Creates new form PlateformReportPanel
    * @param report
    */
-  public PlateformReportPanel(PlateformReport report) {
+  public PlatformReportPanel(PlatformReport report) {
     this.report = report;
     initComponents();
     this.plateformLabel.setText(this.report.name);
@@ -43,6 +44,7 @@ public class PlateformReportPanel extends javax.swing.JPanel implements Platefor
     jSpinner1 = new javax.swing.JSpinner();
     addAgentsButton = new javax.swing.JButton();
     removeAgentsButton = new javax.swing.JButton();
+    killPlatform = new javax.swing.JButton();
 
     setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.LINE_AXIS));
 
@@ -60,11 +62,49 @@ public class PlateformReportPanel extends javax.swing.JPanel implements Platefor
     add(jSpinner1);
 
     addAgentsButton.setText("+");
+    addAgentsButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        addAgentsButtonActionPerformed(evt);
+      }
+    });
     add(addAgentsButton);
 
     removeAgentsButton.setText("-");
+    removeAgentsButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        removeAgentsButtonActionPerformed(evt);
+      }
+    });
     add(removeAgentsButton);
+
+    killPlatform.setText("Remove Block");
+    killPlatform.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        killPlatformActionPerformed(evt);
+      }
+    });
+    add(killPlatform);
   }// </editor-fold>//GEN-END:initComponents
+
+  private void addAgentsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addAgentsButtonActionPerformed
+    this.report.fireAchimEvent(
+            new ArchimEvent.AddAgentsEvent(
+                    this,
+                    report, 
+                    (Integer) this.jSpinner1.getValue()));
+  }//GEN-LAST:event_addAgentsButtonActionPerformed
+
+  private void removeAgentsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeAgentsButtonActionPerformed
+    this.report.fireAchimEvent(
+            new ArchimEvent.RemoveAgentsEvent(
+                    this, 
+                    report, 
+                    (Integer) this.jSpinner1.getValue()));
+  }//GEN-LAST:event_removeAgentsButtonActionPerformed
+
+  private void killPlatformActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_killPlatformActionPerformed
+    this.report.fireAchimEvent(new ArchimEvent.KillCoordEvent(this, report));
+  }//GEN-LAST:event_killPlatformActionPerformed
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -74,13 +114,14 @@ public class PlateformReportPanel extends javax.swing.JPanel implements Platefor
   private javax.swing.Box.Filler filler3;
   private javax.swing.Box.Filler filler4;
   private javax.swing.JSpinner jSpinner1;
+  private javax.swing.JButton killPlatform;
   private javax.swing.JLabel plateformLabel;
   private javax.swing.JButton removeAgentsButton;
   private javax.swing.JLabel runningAgentsLabel;
   // End of variables declaration//GEN-END:variables
 
   @Override
-  public void agentChangeEventOccurred(PlateformReport.AgentChangeEvent evt) {
+  public void agentChangeEventOccurred(PlatformReport.AgentChangeEvent evt) {
     this.updateAgentCount();
   }
 

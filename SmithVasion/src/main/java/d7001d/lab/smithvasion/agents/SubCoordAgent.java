@@ -148,13 +148,13 @@ public class SubCoordAgent extends Agent {
                 this.baseSmithName + (i + 1),
                 AgentSmith.class.getCanonicalName(),
                 new Object[]{
-                  InetAddress.getByName("localhost"),
+                  null,
                   9876,
                   5000l
                 });
         
         smithCtrl.start();
-      } catch (StaleProxyException | UnknownHostException ex) {
+      } catch (StaleProxyException ex) {
         logger.log(Level.SEVERE, null, ex);
       }
     }

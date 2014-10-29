@@ -19,12 +19,9 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import java.io.IOException;
-import java.net.ConnectException;
-import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,9 +34,10 @@ public class AgentSmith extends Agent {
   private long attackPeriod;
   private int targetPort;
   private InetAddress targetAddress;
+  private String owner;
   
   private void parseParams(Object[] args) {
-    if (args.length >= 3) {
+    if (args.length >= 4) {
       try {
         targetAddress = (InetAddress) args[0];
       } catch (ClassCastException ex) {
@@ -54,6 +52,11 @@ public class AgentSmith extends Agent {
       }
       try {
         attackPeriod = (long) args[2];
+      } catch (ClassCastException ex) {
+        logger.log(Level.INFO, "Wrong attack period parameter", ex);
+      }
+      try {
+        owner = (String) args[3];
       } catch (ClassCastException ex) {
         logger.log(Level.INFO, "Wrong attack period parameter", ex);
       }
@@ -72,6 +75,7 @@ public class AgentSmith extends Agent {
     ServiceDescription sd = new ServiceDescription();
     sd.setType(AgentSmith.class.getName());
     sd.setName(this.getLocalName());
+    sd.setOwnership(owner);
     dfd.setName(this.getAID());
     dfd.addServices(sd);
     

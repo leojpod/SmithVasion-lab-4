@@ -17,7 +17,8 @@ public enum SmithVasionMessageFactory {
   NewTarget(ACLMessage.PROPOSE), 
   AddAgents(ACLMessage.PROPOSE), 
   RemoveAgents(ACLMessage.PROPOSE),
-  KillCoord(ACLMessage.PROPOSE);
+  KillCoord(ACLMessage.PROPOSE),
+  KillAgent(ACLMessage.PROPOSE);
 
   public final int performative;
   private SmithVasionMessageFactory(int performative) {
@@ -43,6 +44,8 @@ public enum SmithVasionMessageFactory {
           return new RemoveAgentsMessage(msg);
         case KillCoord: 
           return new KillCoordMessage(msg);
+        case KillAgent:
+          return new KillAgentMessage(msg);
         default: 
           assert false; // should never be reached!
           return null;

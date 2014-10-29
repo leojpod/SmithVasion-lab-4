@@ -11,12 +11,20 @@ import d7001d.lab.smithvasion.messages.NewTargetMessage;
 import d7001d.lab.smithvasion.messages.SmithVasionMessageAbs;
 import d7001d.lab.smithvasion.messages.SmithVasionMessageFactory;
 import jade.core.Agent;
+import jade.core.Profile;
+import jade.core.ProfileImpl;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
+import jade.wrapper.AgentContainer;
+import jade.wrapper.AgentController;
+import jade.wrapper.ContainerController;
+import jade.wrapper.StaleProxyException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,6 +34,10 @@ import java.util.logging.Logger;
  */
 public class SubCoordAgent extends Agent{
   private static final Logger logger = Logger.getLogger(SubCoordAgent.class.getName());
+  
+  private ProfileImpl profile;
+  private AgentContainer containerController;
+  
   
   @Override
   protected void setup() {
@@ -43,7 +55,8 @@ public class SubCoordAgent extends Agent{
       this.doDelete();
       return;
     }
-    
+    this.createContainer("subCoordContainer");
+    this.launchDefault(2);
     logger.log(Level.INFO, "SubCoordAgent {0} reporting for duty!", this.getLocalName());
     
     // create cycling behaviour
@@ -59,6 +72,7 @@ public class SubCoordAgent extends Agent{
               NewTargetMessage newTargetMsg = (NewTargetMessage) message;
               //TODO pass on this message to all the listening instances of AgentSmith
               //but for now:
+              
               logger.log(Level.INFO, 
                       "Received a new Target order from the Architect!\r\n\t {0}",
                       newTargetMsg);
@@ -73,10 +87,43 @@ public class SubCoordAgent extends Agent{
     // end
   }
   
-  
   @Override
   protected void takeDown() {
     try { DFService.deregister(this); }
     catch (Exception e) {}
+  }
+  
+  /**
+   * 
+   * @param nSmith Number of Smith instance to launch
+   */
+  protected void launchDefault(int nSmith) {
+    
+    for (int i = 0; i < nSmith; i += 1) {
+          AgentController smithCtrl;
+      try {
+        smithCtrl = containerController.createNewAgent(
+                "smith" + (i + 1),
+                AgentSmith.class.getCanonicalName(),
+                new Object[]{
+                  InetAddress.getByName("localhost"),
+                  9876,
+                  5000l
+                });
+        
+        smithCtrl.start();
+      } catch (StaleProxyException | UnknownHostException ex) {
+        logger.log(Level.SEVERE, null, ex);
+      }
+    }
+  }
+  
+  protected void createContainer(String containerName) {
+    jade.core.Runtime rt = jade.core.Runtime.instance();
+    profile = new ProfileImpl();
+    profile.setParameter(Profile.CONTAINER_NAME, containerName); 
+    // Create a new non-main container, connecting to the default 
+    // main container (i.e. on this host, port 1099) 
+    containerController = rt.createAgentContainer(profile);
   }
 }

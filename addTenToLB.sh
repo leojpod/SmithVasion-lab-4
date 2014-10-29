@@ -3,7 +3,7 @@
 # Launch a new aws instance from $AMI image
 AMI=ami-38db734f
 #number of new instances
-NUMBER=1
+NUMBER=10
 debug=/home/ubuntu/debug
 aws_output_creation=/home/ubuntu/aws_output_creation
 aws_output=/home/ubuntu/aws_output

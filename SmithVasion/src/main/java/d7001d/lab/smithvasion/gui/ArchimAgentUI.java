@@ -6,13 +6,12 @@
 package d7001d.lab.smithvasion.gui;
 
 import d7001d.lab.smithvasion.gui.events.ArchimEvent;
-import d7001d.lab.smithvasion.models.PlateformReport;
+import d7001d.lab.smithvasion.models.PlatformReport;
+import d7001d.lab.smithvasion.models.PlatformListModel;
 import jade.gui.GuiAgent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Box;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.ListModel;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
@@ -22,20 +21,16 @@ import javax.swing.event.ListDataListener;
 public class ArchimAgentUI extends javax.swing.JFrame implements ListDataListener{
   private static final Logger logger = Logger.getLogger(ArchimAgentUI.class.getName());
   private GuiAgent uiAgent;
-  private ListModel<PlateformReport> plateformsModel;
-  private PlateformReport totalReport;
+  public final PlatformListModel plateformsModel;
+  private final PlatformReport totalReport;
   /**
    * Creates new form ArchimAgentUI
    */
   public ArchimAgentUI() {
-    totalReport = new PlateformReport("Total", 0);
+    totalReport = new PlatformReport("Total", 0);
     initComponents();
     this.jPanel2.add(Box.createHorizontalGlue());
-    this.plateformsModel = new DefaultComboBoxModel<>(new PlateformReport[]{
-      new PlateformReport("Plateforme 1", 100),
-      new PlateformReport("Plateforme 2", 240),
-      new PlateformReport("Plateforme 3", 150)
-    });
+    this.plateformsModel = new PlatformListModel();
     this.plateformsModel.addListDataListener(this);
     
     this.updatePlateformReport(null);
@@ -58,7 +53,6 @@ public class ArchimAgentUI extends javax.swing.JFrame implements ListDataListene
     portInput = new javax.swing.JTextField();
     attackButton = new javax.swing.JButton();
     jSeparator1 = new javax.swing.JSeparator();
-    refreshPlateformButton = new javax.swing.JButton();
     filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 32767));
     jPanel2 = new javax.swing.JPanel();
     jLabel1 = new javax.swing.JLabel();
@@ -66,7 +60,7 @@ public class ArchimAgentUI extends javax.swing.JFrame implements ListDataListene
     monitoringPanel = new javax.swing.JPanel();
     plateformReportPanel = new javax.swing.JPanel();
     jSeparator2 = new javax.swing.JSeparator();
-    totalActivityReportPanel = new PlateformReportPanel(totalReport);
+    totalActivityReportPanel = new d7001d.lab.smithvasion.gui.PlatformReportPanel(totalReport);
 
     setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
     getContentPane().setLayout(new javax.swing.BoxLayout(getContentPane(), javax.swing.BoxLayout.LINE_AXIS));
@@ -110,9 +104,6 @@ public class ArchimAgentUI extends javax.swing.JFrame implements ListDataListene
 
     jSeparator1.setMaximumSize(new java.awt.Dimension(32767, 10));
     controlPanel.add(jSeparator1);
-
-    refreshPlateformButton.setText("Refresh Plateforms");
-    controlPanel.add(refreshPlateformButton);
     controlPanel.add(filler1);
 
     getContentPane().add(controlPanel);
@@ -203,7 +194,6 @@ public class ArchimAgentUI extends javax.swing.JFrame implements ListDataListene
   private javax.swing.JPanel monitoringPanel;
   private javax.swing.JPanel plateformReportPanel;
   private javax.swing.JTextField portInput;
-  private javax.swing.JButton refreshPlateformButton;
   private javax.swing.JPanel totalActivityReportPanel;
   // End of variables declaration//GEN-END:variables
 
@@ -223,15 +213,19 @@ public class ArchimAgentUI extends javax.swing.JFrame implements ListDataListene
   }
 
   private void updatePlateformReport(ListDataEvent e) {
-    logger.log(Level.INFO, "updatePlateformReport");
+    int before = this.plateformReportPanel.getComponents().length;
     this.plateformReportPanel.removeAll();
     int totalAgentCount = 0;
     for (int i = 0; i < this.plateformsModel.getSize(); i += 1) {
-      final PlateformReport report = this.plateformsModel.getElementAt(i);
-      this.plateformReportPanel.add(new PlateformReportPanel(report));
+      final PlatformReport report = this.plateformsModel.getElementAt(i);
+      this.plateformReportPanel.add(new PlatformReportPanel(report));
       totalAgentCount += report.getNumAgents();
     }
     this.totalReport.setNumAgents(totalAgentCount);
+    logger.log(Level.INFO, "updatePlateformReport -> {0} --> {1}",
+            new Object[]{before, this.plateformReportPanel.getComponents().length});
+    this.plateformReportPanel.validate();
+    this.plateformReportPanel.repaint();
   }
 
   private void newTargetSelected() {

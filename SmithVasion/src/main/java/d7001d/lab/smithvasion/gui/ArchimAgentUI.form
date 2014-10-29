@@ -81,11 +81,6 @@
             </Property>
           </Properties>
         </Component>
-        <Component class="javax.swing.JButton" name="refreshPlateformButton">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Refresh Plateforms"/>
-          </Properties>
-        </Component>
         <Component class="javax.swing.Box$Filler" name="filler1">
           <Properties>
             <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
@@ -129,7 +124,7 @@
                 </Component>
                 <Container class="javax.swing.JPanel" name="totalActivityReportPanel">
                   <AuxValues>
-                    <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new PlateformReportPanel(totalReport)"/>
+                    <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new d7001d.lab.smithvasion.gui.PlatformReportPanel(totalReport)"/>
                   </AuxValues>
 
                   <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBoxLayout"/>

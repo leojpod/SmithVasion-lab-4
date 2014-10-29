@@ -7,11 +7,13 @@ package d7001d.lab.smithvasion.agents;
 
 import d7001d.lab.smithvasion.exceptions.NoSuchMessageException;
 import d7001d.lab.smithvasion.exceptions.WrongPerformativeException;
-import d7001d.lab.smithvasion.gui.events.ArchimEvent;
 import d7001d.lab.smithvasion.messages.AddAgentsMessage;
+import d7001d.lab.smithvasion.messages.KillAgentMessage;
 import d7001d.lab.smithvasion.messages.NewTargetMessage;
+import d7001d.lab.smithvasion.messages.RemoveAgentsMessage;
 import d7001d.lab.smithvasion.messages.SmithVasionMessageAbs;
 import d7001d.lab.smithvasion.messages.SmithVasionMessageFactory;
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
@@ -40,8 +42,9 @@ public class SubCoordAgent extends Agent {
   private ProfileImpl profile;
   private AgentContainer containerController;
   private DFAgentDescription dfd;
-  private NewTargetMessage currentTarget = null;
-  private static final int nSmithLaunch = 3;
+  private NewTargetMessage currentTarget = new NewTargetMessage(null, 1099);
+  private int startingSmith = 0,
+          stopingSmith = 0;
   
   private String baseSmithName;
   
@@ -100,7 +103,11 @@ public class SubCoordAgent extends Agent {
                       SubCoordAgent.this.currentTarget);
             } else if (message instanceof AddAgentsMessage) {
               AddAgentsMessage addAgentsMessage = (AddAgentsMessage) message;
-              
+              SubCoordAgent.this.addBehaviour(new StartSmiths(addAgentsMessage.numOfAgents));
+              logger.log(Level.INFO, "Adding {0} agents to this SubCoord", addAgentsMessage.numOfAgents);
+            } else if (message instanceof RemoveAgentsMessage) {
+              RemoveAgentsMessage removeAgentsMessage = (RemoveAgentsMessage) message;
+              SubCoordAgent.this.addBehaviour(new RemoveSmiths(removeAgentsMessage.numOfAgents));
             }
           }
         } catch (WrongPerformativeException | NoSuchMessageException ex) {
@@ -180,5 +187,51 @@ public class SubCoordAgent extends Agent {
       this.baseSmithName = "smith";
     }
   }
-    
+  
+  private class StartSmiths extends OneShotBehaviour{
+    public final int numOfAgents;
+
+    public StartSmiths(int numOfAgents) {
+      this.numOfAgents = numOfAgents;
+    }
+    @Override
+    public void action() {
+      AgentController smithCtrl;
+      for (int i = 0; i < numOfAgents; i ++) {
+        try {
+          //create a smith
+          smithCtrl = containerController.createNewAgent(
+                  SubCoordAgent.this.getLocalName()+"Smith"+(SubCoordAgent.this.startingSmith + 1),
+                  AgentSmith.class.getCanonicalName(),
+                  new Object[]{
+                    SubCoordAgent.this.currentTarget.targetAddress,
+                    SubCoordAgent.this.currentTarget.targetPort,
+                    5000l,
+                    SubCoordAgent.this.getName()
+                  });
+          SubCoordAgent.this.startingSmith += 1;
+          smithCtrl.start();
+        } catch (StaleProxyException ex) {
+          logger.log(Level.SEVERE, null, ex);
+        }
+      }
+    }
+  }
+  public class RemoveSmiths extends OneShotBehaviour{
+    public final int numOfAgents;
+
+    public RemoveSmiths(int numOfAgents) {
+      this.numOfAgents = numOfAgents;
+    }
+    @Override
+    public void action() {
+      ACLMessage msg = new KillAgentMessage().createACLMessage();
+      for (int i = 0; i < numOfAgents; i += 1) {
+        String agent = SubCoordAgent.this.getLocalName() +
+                "Smith" + (SubCoordAgent.this.stopingSmith + 1);
+        msg.addReceiver(new AID(agent, true));
+      }
+      SubCoordAgent.this.send(msg);
+    }
+  }
 }

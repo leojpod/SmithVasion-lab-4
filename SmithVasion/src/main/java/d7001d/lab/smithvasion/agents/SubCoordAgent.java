@@ -101,7 +101,6 @@ public class SubCoordAgent extends Agent {
       }
     });
     
-    //this.addBehaviour(new SubscribeInit(this,DFService.createSubscriptionMessage(this,getDefaultDF(),dfd,sc)));
   }
   
   @Override
@@ -112,12 +111,10 @@ public class SubCoordAgent extends Agent {
   
   protected DFAgentDescription[] getAllAgent(Agent a) {
     try {
-      //TODO Trick is here !
       DFAgentDescription dfdSmith = new DFAgentDescription();
       ServiceDescription sd = new ServiceDescription();
       sd.setType(AgentSmith.class.getName());
       dfdSmith.addServices(sd);
-      //Fucking search methods
       DFAgentDescription[] result = search( this , dfdSmith);
       return result;
     } catch (FIPAException ex) {
@@ -133,7 +130,6 @@ public class SubCoordAgent extends Agent {
     
     for (DFAgentDescription dfAgent: dfAgentTab) {
       
-      System.out.println(dfAgent.getName().getLocalName());
       aclMsg.addReceiver(dfAgent.getName());
     }
     this.send(aclMsg);
@@ -173,35 +169,7 @@ public class SubCoordAgent extends Agent {
     containerController = rt.createAgentContainer(profile);
   }
   
-      private final class SubscribeInit extends SubscriptionInitiator {
-      private int nMsg=0;
-      //DF is going to send all agent register  in the first msg it send to subCoord
-      public SubscribeInit(Agent a, ACLMessage msg) {
-        super(a, msg);
-      }  
-      
-
-      protected void handleInform(ACLMessage inform)
-      {
-        System.out.println("Here we are !" + inform.getContent());
-        /*if (nMsg == 0) {
-          this.getFirstInform(inform);
-        }
-        try {
-          System.out.println("Agent "+getLocalName()+": Notification received from DF");
-          
-          DFAgentDescription[] result = DFService.decodeNotification(inform.getContent());
-          if(result.length > 0)
-          {
-            System.out.println(result.toString());
-          }
-        } catch (FIPAException ex) {
-          logger.log(Level.SEVERE, null, ex);
-        }*/
-      }
-    }
-      
-      private void parseParams(Object[] args) {
+  private void parseParams(Object[] args) {
     if (args.length >= 1) {
       try {
         this.baseSmithName = (String) args[0];

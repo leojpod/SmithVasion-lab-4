@@ -121,6 +121,11 @@ public class SubCoordAgent extends Agent {
                     msg.addReceiver(new AID(name, false));
                   }
                   SubCoordAgent.this.send(msg);
+                  try {
+                    SubCoordAgent.this.containerController.kill();
+                  } catch (StaleProxyException ex) {
+                    Logger.getLogger(SubCoordAgent.class.getName()).log(Level.SEVERE, null, ex);
+                  }
                   SubCoordAgent.this.doDelete();
                 }
               });
@@ -128,7 +133,9 @@ public class SubCoordAgent extends Agent {
               logger.log(Level.INFO, "Got a not expected message");
             }
           }
-        } catch (WrongPerformativeException | NoSuchMessageException ex) {
+        } catch (NoSuchMessageException ex) {
+          logger.log(Level.INFO, "non SmithVasion message received");
+        } catch (WrongPerformativeException ex) {
           logger.log(Level.SEVERE, null, ex);
         }
         block();
@@ -256,7 +263,7 @@ public class SubCoordAgent extends Agent {
               i += 1) {
         String agent = getSmithName(SubCoordAgent.this.stopingSmith);
         SubCoordAgent.this.stopingSmith += 1;
-        msg.addReceiver(new AID(agent, true));
+        msg.addReceiver(new AID(agent, false));
       }
       SubCoordAgent.this.send(msg);
     }

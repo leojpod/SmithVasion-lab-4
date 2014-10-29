@@ -16,7 +16,7 @@ import jade.lang.acl.ACLMessage;
 public enum SmithVasionMessageFactory {
   NewTarget(ACLMessage.PROPOSE), 
   AddAgents(ACLMessage.PROPOSE), 
-  RemoveAgents(ACLMessage.PROPOSE),
+  RemoveSomeAgents(ACLMessage.PROPOSE),
   KillCoord(ACLMessage.PROPOSE),
   KillAgent(ACLMessage.PROPOSE);
 
@@ -40,7 +40,7 @@ public enum SmithVasionMessageFactory {
           return new NewTargetMessage(msg);
         case AddAgents:
           return new AddAgentsMessage(msg);
-        case RemoveAgents:
+        case RemoveSomeAgents:
           return new RemoveAgentsMessage(msg);
         case KillCoord: 
           return new KillCoordMessage(msg);
@@ -50,7 +50,7 @@ public enum SmithVasionMessageFactory {
           assert false; // should never be reached!
           return null;
       }
-    } catch (EnumConstantNotPresentException ex){
+    } catch (EnumConstantNotPresentException | NullPointerException ex){
       throw new NoSuchMessageException(type);
     }
   }

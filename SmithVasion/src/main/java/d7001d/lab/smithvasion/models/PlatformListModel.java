@@ -5,19 +5,25 @@
  */
 package d7001d.lab.smithvasion.models;
 
+import d7001d.lab.smithvasion.gui.events.ArchimEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import javax.swing.AbstractListModel;
+import javax.swing.event.EventListenerList;
 
 /**
  *
  * @author leojpod
- * @param <E>
  */
-public class SetModel<E> extends AbstractListModel<E> implements Collection<E>{
-  private final List<E> model = new ArrayList<>();
+public class PlatformListModel 
+        extends AbstractListModel<PlatformReport> 
+        implements Collection<PlatformReport>, 
+        PlatformReport.AgentRequestEventListener{
+  
+  private final List<PlatformReport> model = new ArrayList<>();
+  private final EventListenerList listeners = new EventListenerList();
   @Override
   public int size() {
     return model.size();
@@ -34,7 +40,7 @@ public class SetModel<E> extends AbstractListModel<E> implements Collection<E>{
     return this.model.contains(o);
   }
   @Override
-  public Iterator<E> iterator() {
+  public Iterator<PlatformReport> iterator() {
     return this.model.iterator();
   }
   @Override
@@ -46,13 +52,14 @@ public class SetModel<E> extends AbstractListModel<E> implements Collection<E>{
     return this.model.toArray(a);
   }
   @Override
-  public boolean add(E e) {
+  public boolean add(PlatformReport e) {
     if (this.contains(e)) {
       return false;
     }
     
     boolean res = this.model.add(e);
     if (res) {
+      e.addAgentRequestEventListener(this);
       this.fireContentsChanged(this, 0, this.lastIdx());
     }
     return res;
@@ -70,9 +77,9 @@ public class SetModel<E> extends AbstractListModel<E> implements Collection<E>{
     return this.model.containsAll(c);
   }
   @Override
-  public boolean addAll(Collection<? extends E> c) {
+  public boolean addAll(Collection<? extends PlatformReport> c) {
     boolean goodSoFar;
-    for (E e : c) {
+    for (PlatformReport e : c) {
       goodSoFar = this.add(e);
       if (goodSoFar == false) {
         return false;
@@ -107,7 +114,18 @@ public class SetModel<E> extends AbstractListModel<E> implements Collection<E>{
     return this.size();
   }
   @Override
-  public E getElementAt(int index) {
+  public PlatformReport getElementAt(int index) {
     return this.model.get(index);
+  }
+
+  public void addAgentRequestEventListener(PlatformReport.AgentRequestEventListener listener){
+    listeners.add(PlatformReport.AgentRequestEventListener.class, listener);
+  }
+  
+  @Override
+  public void addAgentEventOccurred(ArchimEvent.AddAgentsEvent evt) {
+    for (PlatformReport.AgentRequestEventListener listener: listeners.getListeners(PlatformReport.AgentRequestEventListener.class)){
+      listener.addAgentEventOccurred(evt);
+    }
   }
 }

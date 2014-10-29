@@ -5,6 +5,8 @@
  */
 package d7001d.lab.smithvasion.gui.events;
 
+import d7001d.lab.smithvasion.models.PlatformReport;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.gui.GuiEvent;
 
 /**
@@ -26,5 +28,18 @@ public interface ArchimEvent{
       this.address = address;
       this.port = port;
     }
+  }
+
+  public static class AddAgentsEvent extends GuiEvent implements ArchimEvent{
+    public final PlatformReport platform;
+    public final int numOfAgents;
+
+    public AddAgentsEvent(Object eventSource, PlatformReport platform, int numOfAgents) {
+      super(eventSource, ADD_AGENTS);
+      this.platform = platform;
+      this.numOfAgents = numOfAgents;
+    }
+    
+    
   }
 }

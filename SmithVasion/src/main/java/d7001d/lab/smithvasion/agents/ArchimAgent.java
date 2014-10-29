@@ -7,9 +7,10 @@ package d7001d.lab.smithvasion.agents;
 
 import d7001d.lab.smithvasion.gui.ArchimAgentUI;
 import d7001d.lab.smithvasion.gui.events.ArchimEvent;
+import d7001d.lab.smithvasion.messages.AddAgentsMessage;
 import d7001d.lab.smithvasion.messages.NewTargetMessage;
 import d7001d.lab.smithvasion.models.PlatformReport;
-import d7001d.lab.smithvasion.models.SetModel;
+import d7001d.lab.smithvasion.models.PlatformListModel;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.DFService;
 import jade.domain.DFSubscriber;
@@ -19,10 +20,6 @@ import jade.domain.FIPAException;
 import jade.gui.GuiAgent;
 import jade.gui.GuiEvent;
 import jade.lang.acl.ACLMessage;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,7 +29,7 @@ import java.util.logging.Logger;
  */
 public class ArchimAgent extends GuiAgent{
   private static final Logger logger = Logger.getLogger(ArchimAgent.class.getName());
-  SetModel<PlatformReport> subCoords;
+  PlatformListModel subCoords;
   
   @Override
   protected void setup() {
@@ -58,6 +55,14 @@ public class ArchimAgent extends GuiAgent{
     ui.setAgent(this);
     ui.setVisible(true);
     subCoords = ui.plateformsModel;
+    //subscribing to AddAgent events
+    subCoords.addAgentRequestEventListener(new PlatformReport.AgentRequestEventListener() {
+      @Override
+      public void addAgentEventOccurred(ArchimEvent.AddAgentsEvent evt) {
+        ArchimAgent.this.postGuiEvent(evt);
+        evt.platform.setNumAgents(evt.platform.getNumAgents() + evt.numOfAgents);
+      }
+    });
     
     //Create a dfd template for SubCoordinator
     DFAgentDescription subCoordDfd = new DFAgentDescription();
@@ -101,6 +106,17 @@ public class ArchimAgent extends GuiAgent{
       if (archimEvent instanceof ArchimEvent.NewTargetEvent) {
         ArchimEvent.NewTargetEvent newTargetEvent = (ArchimEvent.NewTargetEvent) archimEvent;
         this.addBehaviour(new SendNewTargetBehaviour(newTargetEvent.address, newTargetEvent.port));
+      } else if (archimEvent instanceof ArchimEvent.AddAgentsEvent) {
+        final ArchimEvent.AddAgentsEvent addAgentsEvent = (ArchimEvent.AddAgentsEvent) archimEvent;
+        this.addBehaviour(new OneShotBehaviour() {
+          @Override
+          public void action() {
+            ACLMessage msg = new AddAgentsMessage(addAgentsEvent.platform.dfd.getName(),
+                    addAgentsEvent.numOfAgents).createACLMessage();
+            logger.log(Level.INFO, "Asking to create agents within subCoord {0}", addAgentsEvent.platform.name);
+            ArchimAgent.this.send(msg);
+          }
+        });
       }
     } else {
       logger.log(Level.WARNING, "Received an unexpected UI event! should not be possible");

@@ -7,13 +7,11 @@ package d7001d.lab.smithvasion.gui;
 
 import d7001d.lab.smithvasion.gui.events.ArchimEvent;
 import d7001d.lab.smithvasion.models.PlatformReport;
-import d7001d.lab.smithvasion.models.SetModel;
+import d7001d.lab.smithvasion.models.PlatformListModel;
 import jade.gui.GuiAgent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Box;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.ListModel;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
@@ -23,7 +21,7 @@ import javax.swing.event.ListDataListener;
 public class ArchimAgentUI extends javax.swing.JFrame implements ListDataListener{
   private static final Logger logger = Logger.getLogger(ArchimAgentUI.class.getName());
   private GuiAgent uiAgent;
-  public final SetModel<PlatformReport> plateformsModel;
+  public final PlatformListModel plateformsModel;
   private final PlatformReport totalReport;
   /**
    * Creates new form ArchimAgentUI
@@ -32,7 +30,7 @@ public class ArchimAgentUI extends javax.swing.JFrame implements ListDataListene
     totalReport = new PlatformReport("Total", 0);
     initComponents();
     this.jPanel2.add(Box.createHorizontalGlue());
-    this.plateformsModel = new SetModel<>();
+    this.plateformsModel = new PlatformListModel();
     this.plateformsModel.addListDataListener(this);
     
     this.updatePlateformReport(null);

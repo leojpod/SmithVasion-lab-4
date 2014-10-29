@@ -5,6 +5,7 @@
  */
 package d7001d.lab.smithvasion.gui;
 
+import d7001d.lab.smithvasion.gui.events.ArchimEvent;
 import d7001d.lab.smithvasion.models.PlatformReport;
 
 /**
@@ -60,11 +61,24 @@ public class PlatformReportPanel extends javax.swing.JPanel implements PlatformR
     add(jSpinner1);
 
     addAgentsButton.setText("+");
+    addAgentsButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        addAgentsButtonActionPerformed(evt);
+      }
+    });
     add(addAgentsButton);
 
     removeAgentsButton.setText("-");
     add(removeAgentsButton);
   }// </editor-fold>//GEN-END:initComponents
+
+  private void addAgentsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addAgentsButtonActionPerformed
+    this.report.fireAchimEvent(
+            new ArchimEvent.AddAgentsEvent(
+                    this,
+                    report, 
+                    (Integer) this.jSpinner1.getValue()));
+  }//GEN-LAST:event_addAgentsButtonActionPerformed
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables

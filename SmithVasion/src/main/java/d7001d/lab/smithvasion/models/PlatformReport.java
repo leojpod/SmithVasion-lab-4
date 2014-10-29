@@ -5,6 +5,7 @@
  */
 package d7001d.lab.smithvasion.models;
 
+import d7001d.lab.smithvasion.gui.events.ArchimEvent;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import java.util.EventListener;
 import java.util.EventObject;
@@ -20,11 +21,23 @@ public class PlatformReport {
       super(source);
     }
   }
+  public class AddAgentEvent extends EventObject {
+    public final PlatformReport report;
+    public final int numOfAgents;
+    public AddAgentEvent(Object source, PlatformReport report, int numOfAgents) {
+      super(source);
+      this.report = report; this.numOfAgents = numOfAgents;
+    }
+  }
   public interface AgentChangeEventListener extends EventListener {
     public void agentChangeEventOccurred(AgentChangeEvent evt);
   }
+  public interface AgentRequestEventListener extends EventListener {
+    public void addAgentEventOccurred(ArchimEvent.AddAgentsEvent evt);
+  }
   
   protected EventListenerList listenerList = new EventListenerList();
+  protected EventListenerList agentRequestListeners = new EventListenerList();
   public final String name;
   private int numAgents;
   public final DFAgentDescription dfd;
@@ -52,9 +65,21 @@ public class PlatformReport {
   public void removeAgentChangeEventListener(AgentChangeEventListener listener) {
     listenerList.remove(AgentChangeEventListener.class, listener);
   }
+  public void addAgentRequestEventListener(AgentRequestEventListener listener) {
+    listenerList.add(AgentRequestEventListener.class, listener);
+  }
+  public void removeAgentRequestEventListener(AgentRequestEventListener listener) {
+    listenerList.remove(AgentRequestEventListener.class, listener);
+  }
   void fireAgentChangeEvent(AgentChangeEvent evt) {
     for (AgentChangeEventListener listener: this.listenerList.getListeners(AgentChangeEventListener.class)) {
       listener.agentChangeEventOccurred(evt);
+    }
+  }
+  
+  public void fireAchimEvent(ArchimEvent.AddAgentsEvent evt) {
+    for (AgentRequestEventListener listener: this.listenerList.getListeners(AgentRequestEventListener.class)) {
+      listener.addAgentEventOccurred(evt);
     }
   }
 }

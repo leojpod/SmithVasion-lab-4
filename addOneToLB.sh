@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Launch a new aws instance from $AMI image
-AMI=ami-580fa72f
+AMI=ami-541db523
 #number of new instances
 NUMBER=1
 aws_output_creation=/home/ubuntu/aws_output_creation

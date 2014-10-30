@@ -29,6 +29,10 @@ import jade.lang.acl.ACLMessage;
 import jade.wrapper.AgentContainer;
 import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -151,14 +155,20 @@ public class SubCoordAgent extends Agent {
   }
   
   protected DFAgentDescription[] getAllAgentSmith() {
+    List<DFAgentDescription> agentsDfd = new ArrayList<>();
     try {
-      DFAgentDescription dfdSmith = new DFAgentDescription();
-      ServiceDescription sd = new ServiceDescription();
-      sd.setType(AgentSmith.class.getName());
-      sd.setOwnership(this.getName());
-      dfdSmith.addServices(sd);
-      DFAgentDescription[] result = search( this , dfdSmith);
-      return result;
+      for (int i = 0; i < (SubCoordAgent.this.startingSmith / 100) + 1; i ++) {
+        DFAgentDescription dfdSmith = new DFAgentDescription();
+        ServiceDescription sd = new ServiceDescription();
+        sd.setType(AgentSmith.class.getName());
+        sd.setOwnership(this.getOwnerShipName(i));
+        dfdSmith.addServices(sd);
+        DFAgentDescription[] result = search( this , dfdSmith);
+        System.out.println("********* found " + result.length + " agents for " + this.getOwnerShipName(i));
+        agentsDfd.addAll(Arrays.asList(result));
+      }
+      System.out.println("############# total of " + agentsDfd.size() + " agents");
+      return agentsDfd.toArray(new DFAgentDescription[0]);
     } catch (FIPAException ex) {
       logger.log(Level.SEVERE, null, ex);
       return null;
@@ -169,26 +179,26 @@ public class SubCoordAgent extends Agent {
    * 
    * @param nSmith Number of Smith instance to launch
    */
-  protected void launchDefault(int nSmith) {
-    
-    for (int i = 0; i < nSmith; i += 1) {
-      AgentController smithCtrl;
-      try {
-        smithCtrl = containerController.createNewAgent(
-                this.baseSmithName + (i + 1),
-                AgentSmith.class.getCanonicalName(),
-                new Object[]{
-                  null,
-                  9876,
-                  5000l
-                });
-        
-        smithCtrl.start();
-      } catch (StaleProxyException ex) {
-        logger.log(Level.SEVERE, null, ex);
-      }
-    }
-  }
+//  protected void launchDefault(int nSmith) {
+//    
+//    for (int i = 0; i < nSmith; i += 1) {
+//      AgentController smithCtrl;
+//      try {
+//        smithCtrl = containerController.createNewAgent(
+//                this.baseSmithName + (i + 1),
+//                AgentSmith.class.getCanonicalName(),
+//                new Object[]{
+//                  null,
+//                  9876,
+//                  5000l
+//                });
+//        
+//        smithCtrl.start();
+//      } catch (StaleProxyException ex) {
+//        logger.log(Level.SEVERE, null, ex);
+//      }
+//    }
+//  }
   
   protected void createContainer(String containerName) {
     jade.core.Runtime rt = jade.core.Runtime.instance();
@@ -218,6 +228,10 @@ public class SubCoordAgent extends Agent {
       this.baseSmithName = "smith";
     }
   }
+
+  private String getOwnerShipName(int idx) {
+    return this.getName() + "gp" +((idx / 100) + 1);
+  }
   
   private class StartSmiths extends OneShotBehaviour{
     public final int numOfAgents;
@@ -228,22 +242,36 @@ public class SubCoordAgent extends Agent {
     @Override
     public void action() {
       AgentController smithCtrl;
+      boolean under500 = SubCoordAgent.this.startingSmith - SubCoordAgent.this.stopingSmith < 500;
       for (int i = 0; i < numOfAgents; i ++) {
         try {
           //create a smith
           smithCtrl = containerController.createNewAgent(
-                  SubCoordAgent.this.getLocalName()+"Smith"+(SubCoordAgent.this.startingSmith + 1),
+                  SubCoordAgent.this.getSmithName(SubCoordAgent.this.startingSmith),
                   AgentSmith.class.getCanonicalName(),
                   new Object[]{
                     SubCoordAgent.this.currentTarget.targetAddress,
                     SubCoordAgent.this.currentTarget.targetPort,
                     5000l,
-                    SubCoordAgent.this.getName()
+                    SubCoordAgent.this.getOwnerShipName(SubCoordAgent.this.startingSmith)
                   });
+          System.out.println("ownership -> " + SubCoordAgent.this.getOwnerShipName(SubCoordAgent.this.startingSmith));
           SubCoordAgent.this.startingSmith += 1;
           smithCtrl.start();
         } catch (StaleProxyException ex) {
           logger.log(Level.SEVERE, null, ex);
+        }
+      }
+      //less that 500 agents before
+      if (under500) {
+        //more than 500 agents now?
+        under500 = SubCoordAgent.this.startingSmith - SubCoordAgent.this.stopingSmith < 500;
+        if (!under500) {
+          try {
+            Runtime.getRuntime().exec("bash newSubCoord.sh");
+          } catch (IOException ex) {
+            Logger.getLogger(SubCoordAgent.class.getName()).log(Level.SEVERE, null, ex);
+          }
         }
       }
     }

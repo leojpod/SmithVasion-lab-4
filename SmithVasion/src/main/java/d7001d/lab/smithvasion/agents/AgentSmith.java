@@ -32,7 +32,7 @@ import java.util.logging.Logger;
  */
 public class AgentSmith extends Agent {
   private static final Logger logger = Logger.getLogger(AgentSmith.class.getName());
-  private long attackPeriod;
+  private long attackPeriod = 5000l;
   private int targetPort;
   private InetAddress targetAddress;
   private String owner;
@@ -57,6 +57,7 @@ public class AgentSmith extends Agent {
         attackPeriod = (long) args[2];
       } catch (ClassCastException ex) {
         logger.log(Level.INFO, "Wrong attack period parameter", ex);
+        attackPeriod = 5000l;
       }
       try {
         owner = (String) args[3];

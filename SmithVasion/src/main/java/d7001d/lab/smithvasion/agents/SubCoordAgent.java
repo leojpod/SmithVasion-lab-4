@@ -9,6 +9,7 @@ import d7001d.lab.smithvasion.exceptions.NoSuchMessageException;
 import d7001d.lab.smithvasion.exceptions.WrongPerformativeException;
 import d7001d.lab.smithvasion.messages.AddAgentsMessage;
 import d7001d.lab.smithvasion.messages.KillAgentMessage;
+import d7001d.lab.smithvasion.messages.KillCoordMessage;
 import d7001d.lab.smithvasion.messages.NewTargetMessage;
 import d7001d.lab.smithvasion.messages.RemoveAgentsMessage;
 import d7001d.lab.smithvasion.messages.SmithVasionMessageAbs;
@@ -108,9 +109,33 @@ public class SubCoordAgent extends Agent {
             } else if (message instanceof RemoveAgentsMessage) {
               RemoveAgentsMessage removeAgentsMessage = (RemoveAgentsMessage) message;
               SubCoordAgent.this.addBehaviour(new RemoveSmiths(removeAgentsMessage.numOfAgents));
+            } else if (message instanceof KillCoordMessage) {
+              SubCoordAgent.this.addBehaviour(new OneShotBehaviour() {
+                @Override
+                public void action() {
+                  //kill all the smith!
+                  ACLMessage msg = new KillAgentMessage().createACLMessage();
+                  while(SubCoordAgent.this.stopingSmith < SubCoordAgent.this.startingSmith) {
+                    String name = SubCoordAgent.this.getSmithName(SubCoordAgent.this.stopingSmith);
+                    SubCoordAgent.this.stopingSmith += 1;
+                    msg.addReceiver(new AID(name, false));
+                  }
+                  SubCoordAgent.this.send(msg);
+                  try {
+                    SubCoordAgent.this.containerController.kill();
+                  } catch (StaleProxyException ex) {
+                    Logger.getLogger(SubCoordAgent.class.getName()).log(Level.SEVERE, null, ex);
+                  }
+                  SubCoordAgent.this.doDelete();
+                }
+              });
+            } else {
+              logger.log(Level.INFO, "Got a not expected message");
             }
           }
-        } catch (WrongPerformativeException | NoSuchMessageException ex) {
+        } catch (NoSuchMessageException ex) {
+          logger.log(Level.INFO, "non SmithVasion message received");
+        } catch (WrongPerformativeException ex) {
           logger.log(Level.SEVERE, null, ex);
         }
         block();
@@ -173,6 +198,12 @@ public class SubCoordAgent extends Agent {
     // main container (i.e. on this host, port 1099) 
     containerController = rt.createAgentContainer(profile);
   }
+
+  public String getSmithName(int idx) {
+    String agent = this.getLocalName() +
+            "Smith" + (idx + 1);
+    return agent;
+  }
   
   private void parseParams(Object[] args) {
     if (args.length >= 1) {
@@ -226,10 +257,13 @@ public class SubCoordAgent extends Agent {
     @Override
     public void action() {
       ACLMessage msg = new KillAgentMessage().createACLMessage();
-      for (int i = 0; i < numOfAgents; i += 1) {
-        String agent = SubCoordAgent.this.getLocalName() +
-                "Smith" + (SubCoordAgent.this.stopingSmith + 1);
-        msg.addReceiver(new AID(agent, true));
+      for (int i = 0; 
+              i < numOfAgents && 
+              SubCoordAgent.this.stopingSmith < SubCoordAgent.this.startingSmith;
+              i += 1) {
+        String agent = getSmithName(SubCoordAgent.this.stopingSmith);
+        SubCoordAgent.this.stopingSmith += 1;
+        msg.addReceiver(new AID(agent, false));
       }
       SubCoordAgent.this.send(msg);
     }

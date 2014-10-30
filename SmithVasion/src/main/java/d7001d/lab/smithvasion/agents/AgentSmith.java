@@ -7,6 +7,7 @@ package d7001d.lab.smithvasion.agents;
 
 import d7001d.lab.smithvasion.exceptions.NoSuchMessageException;
 import d7001d.lab.smithvasion.exceptions.WrongPerformativeException;
+import d7001d.lab.smithvasion.messages.KillAgentMessage;
 import d7001d.lab.smithvasion.messages.NewTargetMessage;
 import d7001d.lab.smithvasion.messages.SmithVasionMessageAbs;
 import d7001d.lab.smithvasion.messages.SmithVasionMessageFactory;
@@ -35,6 +36,8 @@ public class AgentSmith extends Agent {
   private int targetPort;
   private InetAddress targetAddress;
   private String owner;
+  private AttackBehavior attack;
+  private TakeOrders takeOrders;
   
   private void parseParams(Object[] args) {
     if (args.length >= 4) {
@@ -88,13 +91,15 @@ public class AgentSmith extends Agent {
     }
     
     //"final" parameters for now
-    this.addBehaviour(new AttackBehavior(this, attackPeriod));
-    this.addBehaviour(new UpdateTarget(this));
+    attack = new AttackBehavior(this, attackPeriod);
+    this.addBehaviour(attack);
+    takeOrders = new TakeOrders(this);
+    this.addBehaviour(takeOrders);
   }
     
-  private final class UpdateTarget extends CyclicBehaviour {
+  private final class TakeOrders extends CyclicBehaviour {
 
-    public UpdateTarget(Agent a) {
+    public TakeOrders(Agent a) {
       super(a);
     }
 
@@ -124,13 +129,14 @@ public class AgentSmith extends Agent {
             //Set new target of Smith
             setTargetAddress(newTargetAddress);
             setTargetPort(newTargetMsg.targetPort);
+          } else if (message instanceof KillAgentMessage) {
+            AgentSmith.this.doDelete();
           }
           
         }
       } catch (WrongPerformativeException | NoSuchMessageException ex) {
         logger.log(Level.SEVERE, null, ex);
       }
-      
       block();
     }
   }

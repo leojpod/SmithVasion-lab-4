@@ -1,6 +1,6 @@
 
 #!/bin/bash
-AMI=ami-bc1cb4cb
+AMI=ami-9efd56e9
 aws_output_creation=/home/ubuntu/aws_output_creation
 aws_output=/home/ubuntu/aws_output
 su root -c "aws ec2 run-instances --image-id $AMI --count 1 --instance-type t2.micro --key-name 14\ _LP1_KEY_\ D7001D_thimar-4 --subnet-id subnet-47ca2d1e > $aws_output_creation"

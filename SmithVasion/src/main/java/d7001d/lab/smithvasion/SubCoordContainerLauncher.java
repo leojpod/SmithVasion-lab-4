@@ -21,7 +21,7 @@ import java.io.InputStreamReader;
  */
 public class SubCoordContainerLauncher {
   public final static void main(String[] args) throws IOException, StaleProxyException {
-    String remote = "54.171.192.184";
+    String remote = "54.171.195.96";
     int port = 1099;
     /*if (args.length < 2 ) {
       System.out.println("missing parameters please type them now");
